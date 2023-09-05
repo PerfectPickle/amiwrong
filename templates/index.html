@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block main %}
+<section class="pt-5">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-10 col-xl-8">
+                <h1 class="display-6">Put your assumption to the test</h1>
+                <p class="fs-md-1 mt-4">Make a poll. Choose your options. Ask amiwrong? Find out the answer and more.
+                </p>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-3 text-center">
+            <div class="col">
+                <div class="card py-4 px-3 mt-3 h-100 box-shadow-all border-0 bg-dark text-light">
+                    <div class="card-body"><img src="" alt="" />
+                        <h3 class="py-3">Privacy by Default</h3>
+                        <p class="lead mb-0">No identifiable info such as email or username can be linked to a response,
+                            as none of it is submitted to any given poll, and thus there is no record of any given
+                            user's activity.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card py-4 px-3 mt-3 h-100 box-shadow-all border-0 bg-dark text-light">
+                    <div class="card-body"><img src="" alt="" />
+                        <h3 class="py-3">Find Interesting Demographic Trends</h3>
+                        <p class="lead mb-0">See how responses differ between chosen demographic selectors, no matter
+                            how absurd.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card py-4 px-3 mt-3 h-100 box-shadow-all border-0 bg-dark text-light">
+                    <div class="card-body"><img src="" alt="" />
+                        <h3 class="py-3">Rich graphs</h3>
+                        <p class="lead mb-0">Hairy statistics are absracted away so that you can see what's relevant
+                            clearly and easily.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pt-5">
+    <div class="container">
+        <div class="row align-items-center bg-dark text-light">
+            <div class="col-md-6"><img src="" alt="" />
+                <h1 class="display-5 lh-sm my-4">The maths
+                </h1>
+                <p class="fs-1">We use a statistical method called significance testing to determine if an assumption
+                    is wrong. Each colloquial confidence level corresponds to a mathematical significance level:</p>
+                <p class="fs-1">Extremely: 0.01</p>
+                <p class="fs-1">Pretty: 0.025</p>
+                <p class="fs-1">Fairly: 0.5</p>
+                <p class="fs-1">Hardly: 0.1</p>
+            </div>
+            <div class="col-md-6 col-xl-4 offset-xl-1">
+                <div class="card box-shadow-rb my-4">
+                    <div class="card-body my-3 mx-4 bg-dark text-light">
+                        <h1 class="mb-4 pb-2">Image here</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
