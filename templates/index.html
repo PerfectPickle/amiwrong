@@ -5,6 +5,8 @@ Home
 {% endblock %}
 
 {% block main %}
+<script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+
 <section class="pt-5">
     <div class="container">
         <div class="row justify-content-center text-center">
@@ -14,6 +16,27 @@ Home
                 </p>
             </div>
         </div>
+
+        <section class="pt-5">
+            <div class="container">
+                <div class="row align-items-center bg-dark text-light">
+                    <div class="col-md-6"><img src="" alt="" />
+                        <span id="home-typed">
+                        </span>
+                    </div>
+                    <div class="col-md-6 col-xl-4 offset-xl-1">
+                        <div class="card box-shadow-rb my-4">
+
+                            <button type="button" class="btn btn-primary">
+                                amiwrong?
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-3 text-center">
             <div class="col">
                 <div class="card py-4 px-3 mt-3 h-100 box-shadow-all border-0 bg-dark text-light">
@@ -45,31 +68,42 @@ Home
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<section class="pt-5">
-    <div class="container">
-        <div class="row align-items-center bg-dark text-light">
-            <div class="col-md-6"><img src="" alt="" />
-                <h1 class="display-5 lh-sm my-4">The maths
-                </h1>
-                <p class="fs-1">We use a statistical method called significance testing to determine if an assumption
-                    is wrong. Each colloquial confidence level corresponds to a mathematical significance level:</p>
-                <p class="fs-1">Extremely: 0.01</p>
-                <p class="fs-1">Pretty: 0.025</p>
-                <p class="fs-1">Fairly: 0.5</p>
-                <p class="fs-1">Hardly: 0.1</p>
-            </div>
-            <div class="col-md-6 col-xl-4 offset-xl-1">
-                <div class="card box-shadow-rb my-4">
-                    <div class="card-body my-3 mx-4 bg-dark text-light">
-                        <h1 class="mb-4 pb-2">Image here</h1>
+        <section class="pt-5">
+            <div class="container">
+                <div class="row align-items-center bg-dark text-light">
+                    <div class="col-md-6"><img src="" alt="" />
+                        <h1 class="display-5 lh-sm my-4">The maths
+                        </h1>
+                        <p class="fs-1">We use a statistical method called significance testing to determine if an
+                            assumption
+                            is wrong. Each colloquial confidence level corresponds to a mathematical significance level:
+                        </p>
+                        <p class="fs-1">Extremely: 0.01</p>
+                        <p class="fs-1">Pretty: 0.025</p>
+                        <p class="fs-1">Fairly: 0.5</p>
+                        <p class="fs-1">Hardly: 0.1</p>
+                    </div>
+                    <div class="col-md-6 col-xl-4 offset-xl-1">
+                        <div class="card box-shadow-rb my-4">
+                            <div class="card-body my-3 mx-4 bg-dark text-light">
+                                <h1 class="mb-4 pb-2">Image here</h1>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </section>
+
+<script>
+    var typed = new Typed('#home-typed', {
+        strings: ['<i>Most</i> people prefer Stone Ocean to Golden Wind.', '<i>More</i> people in their 20s are vegan than other age groups.', 'People with cats are <i>likelier</i> to enjoy pineapple on pizza'],
+        typeSpeed: 50,
+        loop: true,
+        backSpeed: 50,
+    });
+</script>
 
 {% endblock %}
