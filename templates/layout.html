@@ -43,7 +43,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">amiwrong</a>
+            <a class="navbar-brand" href="/">amiwrong</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -54,10 +54,10 @@
                         <a class="nav-link" href="#">Start a Poll</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Log in</a>
+                        <a class="nav-link" href="/login">Log in</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Register</a>
+                        <a class="nav-link" href="/register">Register</a>
                     </li>
                 </ul>
             </div>
@@ -69,8 +69,20 @@
         {% block main %}{% endblock %}
     </div>
 
-    <footer class="mt-auto text-white-50">
-        Copyright lossless_lotus
+    <footer class="mt-5 pt-5 bg-dark text-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2023 lossless_lotus</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <ul class="list-inline">
+                        <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
+                        <li class="list-inline-item"><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </footer>
 
     {% block scripts %}{% endblock %}

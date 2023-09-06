@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Login
+Sign Up
 {% endblock %}
 
 {% block main %}
@@ -12,10 +12,18 @@ Login
             placeholder="Username" type="text">
     </div>
     <div class="mb-3">
+        <input autocomplete="off" autofocus class="form-control mx-auto w-auto form-field" id="Email" name="Email"
+            placeholder="Email" type="text">
+    </div>
+    <div class="mb-3">
         <input class="form-control mx-auto w-auto form-field" id="password" name="password" placeholder="Password"
             type="password">
     </div>
-    <button class="btn btn-primary form-btn" type="submit">Log In</button>
+    <div class="mb-3">
+        <input class="form-control mx-auto w-auto form-field" id="confirmation" name="confirmation"
+            placeholder="Confirm password" type="password">
+    </div>
+    <button class="btn btn-primary form-btn" type="submit">Sign Up</button>
 </form>
 
 {% endblock %}
