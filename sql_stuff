@@ -1,0 +1,44 @@
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    hash TEXT NOT NULL,
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_active DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE profiles ( 
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+    user_id INT NOT NULL, 
+    age INT, 
+    country TEXT, 
+    gender TEXT, 
+    sexuality TEXT, 
+    politics TEXT, 
+    language TEXT, 
+    FOREIGN KEY (user_id) REFERENCES users(id));
+
+CREATE TABLE polls (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    statement TEXT NOT NULL,
+    question TEXT NOT NULL,
+    creation_date TIMESTAMP NOT NULL,
+    hide_statement INTEGER NOT NULL,
+    null_hyp TEXT NOT NULL,
+    alt_hyp TEXT NOT NULL,
+    significance_level REAL NOT NULL
+    
+    made_by_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE answers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    poll_id INTEGER NOT NULL,
+    answer TEXT NOT NULL,
+
+    FOREIGN KEY (polls_id) REFERENCES polls(id)
+);
+

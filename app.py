@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import bcrypt
 
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -55,13 +56,34 @@ def login_required(f):
 def index():
     return render_template("index.html")
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if request.method == "POST":
+        # check if user exists
+        # get oassword hash from user if found
+        # check inputted password to hash
+        # if bcrypt.checkpw(password.encode('utf-8'), hash.encode('utf-8')):
+        #     print('Logging in..')
+        #     return redirect("/")
+        # else:
+        #     print('Password is incorrect.')
+        print("trinyg to log in")
+        return redirect("/")
+    else:
+        return render_template("login.html")
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    return render_template("register.html")
+    if request.method == "POST":
+        print("register user")
+        password = "testing"
+        # generate salt and hash password using bcrypt
+        salt = bcrypt.gensalt()
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+        return redirect("/")
+    else:
+        return render_template("register.html")
 
 connection.close()
 
