@@ -6,14 +6,13 @@ Sign Up
 
 {% block main %}
 
-<form action="/register" method="post" class="pt-5 d-flex flex-column align-items-center">
+<form action="/register" id="registration" method="post" class="pt-5 d-flex flex-column align-items-center">
+    <div class="mb-3" id="failure-msg">
+        {{ message }}
+    </div>
     <div class="mb-3">
         <input autocomplete="off" autofocus class="form-control mx-auto w-auto form-field" id="username" name="username"
             placeholder="Username" type="text">
-    </div>
-    <div class="mb-3">
-        <input autocomplete="off" autofocus class="form-control mx-auto w-auto form-field" id="Email" name="Email"
-            placeholder="Email" type="text">
     </div>
     <div class="mb-3">
         <input class="form-control mx-auto w-auto form-field" id="password" name="password" placeholder="Password"
@@ -23,7 +22,19 @@ Sign Up
         <input class="form-control mx-auto w-auto form-field" id="confirmation" name="confirmation"
             placeholder="Confirm password" type="password">
     </div>
-    <button class="btn btn-primary form-btn" type="submit">Sign Up</button>
+    <button class="btn btn-primary form-btn" type=" submit">Sign Up</button>
+
 </form>
+
+<!-- to display flash messages -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashes">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
 
 {% endblock %}

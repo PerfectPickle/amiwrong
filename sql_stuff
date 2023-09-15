@@ -1,12 +1,12 @@
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
     hash TEXT NOT NULL,
     creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    creation_ip TEXT NOT NULL,
+    reputation INTEGER NOT NULL DEFAULT 10,
     last_active DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
 
 CREATE TABLE profiles ( 
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
@@ -18,19 +18,19 @@ CREATE TABLE profiles (
     sexuality TEXT, 
     politics TEXT, 
     language TEXT, 
-    FOREIGN KEY (user_id) REFERENCES users(id));
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    );
 
 CREATE TABLE polls (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    user_id INTEGER NOT NULL,
     statement TEXT NOT NULL,
     question TEXT NOT NULL,
-    creation_date TIMESTAMP NOT NULL,
+    creation_date DATETIME NOT NULL,
     hide_statement INTEGER NOT NULL,
     null_hyp TEXT NOT NULL,
     alt_hyp TEXT NOT NULL,
     significance_level REAL NOT NULL
-    
-    made_by_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -39,6 +39,6 @@ CREATE TABLE answers (
     poll_id INTEGER NOT NULL,
     answer TEXT NOT NULL,
 
-    FOREIGN KEY (polls_id) REFERENCES polls(id)
+    FOREIGN KEY (poll_id) REFERENCES polls(id)
 );
 

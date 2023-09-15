@@ -11,3 +11,18 @@
 .form-btn {
 	font-size: 30px;
 }
+
+#failure-msg:empty {
+	display: none;
+}
+
+/* For the flash feedback messages */
+ul.flashes {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+ul.flashes li {
+	color: red;
+}
