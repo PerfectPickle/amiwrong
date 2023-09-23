@@ -51,19 +51,42 @@ def login_required(f):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    if session.get("user_id") is None:
+        return render_template("index.html")
+    else:
+        return render_template("polls.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
+        # get username from form
+        username = request.form.get("username")
+
+        # Connect to the database
+        connection = sqlite3.connect("amiwrong.db")
+        # Cursor with which to interact with database
+        cursor = connection.cursor()
+
         # check if user exists
-        # get oassword hash from user if found
+        user_lookup = cursor.execute("SELECT * FROM users WHERE users.username = ?;", (username,)).fetchall()
+
+        if len(user_lookup) != 1:
+            connection.close()
+            flash("Username not found")
+            return redirect("/login")
+
+        # get password from form
+        password = request.form.get("password")
+        # get oassword hash from user
+        hash = cursor.execute("SELECT hash FROM users WHERE users.username = ?;", (username,)).fetchone()[0]
+        print(hash)
         # check inputted password to hash
-        # if bcrypt.checkpw(password.encode('utf-8'), hash.encode('utf-8')):
-        #     print('Logging in..')
-        #     return redirect("/")
-        # else:
-        #     print('Password is incorrect.')
+        if bcrypt.checkpw(password.encode('utf-8'), hash):
+            print('Logging in..')
+            session["user_id"] = cursor.execute("SELECT id FROM users WHERE users.username = ?;", (username,)).fetchone()[0]
+            return redirect("/")
+        else:
+            print('Password is incorrect.')
         print("trinyg to log in")
         return redirect("/")
     else:
