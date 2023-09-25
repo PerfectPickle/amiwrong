@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Confirm sign out
+{% endblock %}
+
+{% block main %}
+
+<h1>Signing Out</h1>
+
+<form action="/signout" method="post" class="pt-5 d-flex flex-column align-items-center">
+    <h2>Are you sure you want to sign out?</h2>
+    <button class="btn btn-primary form-btn" type="submit">Yes, sign out</button>
+</form>
+
+<!-- to display flash messages -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashes">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+{% endblock %}

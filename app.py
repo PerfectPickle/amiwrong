@@ -49,6 +49,17 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def logged_out_required(f):
+    """
+    Decorator for routes to require that the user is not logged in
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is not None:
+            return redirect("/")  # Redirect to a different page if the user is logged in
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route("/")
 def index():
     if session.get("user_id") is None:
@@ -57,6 +68,7 @@ def index():
         return render_template("polls.html")
 
 @app.route("/login", methods=["GET", "POST"])
+@logged_out_required
 def login():
     if request.method == "POST":
         # get username from form
@@ -84,15 +96,19 @@ def login():
         if bcrypt.checkpw(password.encode('utf-8'), hash):
             print('Logging in..')
             session["user_id"] = cursor.execute("SELECT id FROM users WHERE users.username = ?;", (username,)).fetchone()[0]
+            connection.close()
             return redirect("/")
         else:
-            print('Password is incorrect.')
+            connection.close()
+            flash("Incorrect password")
+            return redirect("/login")
         print("trinyg to log in")
         return redirect("/")
     else:
         return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
+@logged_out_required
 def register():
     if request.method == "POST":
         print("register user")
@@ -164,7 +180,38 @@ def register():
     else:
         return render_template("register.html")
 
+@app.route("/create", methods=["GET", "POST"])
+@login_required
+def create():
+    # poll creation
+    if request.method == "POST":
+        return redirect("/")
+    else:
+        return render_template("create.html")
 
+@app.route("/signout", methods=["GET", "POST"])
+@login_required
+def signout():
+    if request.method == "POST":
+        # Forget any user_id
+        session.clear()
+
+        # Redirect user to login form
+        return redirect("/")
+    else:
+        return render_template("confirm_signout.html")
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        # TODO save changes to profile
+        print("Saved changes to profile")
+
+        # Refresh page
+        return redirect("/profile")
+    else:
+        return render_template("profile.html")
 
 
 #@login_required

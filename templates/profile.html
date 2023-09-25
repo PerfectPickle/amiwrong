@@ -1,21 +1,23 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Login
+My Profile
 {% endblock %}
 
 {% block main %}
 
-<form action="/login" method="post" class="pt-5 d-flex flex-column align-items-center">
+<h1>Save Common Details For Future Polls</h1>
+
+<form action="/profile" method="post" class="pt-5 d-flex flex-column align-items-center">
     <div class="mb-3">
         <input autocomplete="off" autofocus class="form-control mx-auto w-auto form-field" id="username" name="username"
-            placeholder="Username" type="text">
+            placeholder="Age" type="text">
     </div>
     <div class="mb-3">
-        <input class="form-control mx-auto w-auto form-field" id="password" name="password" placeholder="Password"
-            type="password">
+        <input class="form-control mx-auto w-auto form-field" id="password" name="password" placeholder="Sex"
+            type="text">
     </div>
-    <button class="btn btn-primary form-btn" type="submit">Log In</button>
+    <button class="btn btn-primary form-btn" type="submit">Save Changes</button>
 </form>
 
 <!-- to display flash messages -->
