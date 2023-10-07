@@ -26,3 +26,10 @@ ul.flashes {
 ul.flashes li {
 	color: red;
 }
+
+
+.small-btn {
+    width: 200px; 
+    height: 60px;
+    font-size: 28px; 
+}
