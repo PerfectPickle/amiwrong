@@ -83,6 +83,7 @@ def login():
         user_lookup = cursor.execute("SELECT * FROM users WHERE users.username = ?;", (username,)).fetchall()
 
         if len(user_lookup) != 1:
+            cursor.close()
             connection.close()
             flash("Username not found")
             return redirect("/login")
@@ -96,9 +97,11 @@ def login():
         if bcrypt.checkpw(password.encode('utf-8'), hash):
             print('Logging in..')
             session["user_id"] = cursor.execute("SELECT id FROM users WHERE users.username = ?;", (username,)).fetchone()[0]
+            cursor.close()
             connection.close()
             return redirect("/")
         else:
+            cursor.close()
             connection.close()
             flash("Incorrect password")
             return redirect("/login")
@@ -174,6 +177,7 @@ def register():
         # commit changes
         connection.commit()
         # close connection
+        cursor.close()
         connection.close()
 
         return redirect("/")
@@ -205,13 +209,158 @@ def signout():
 @login_required
 def profile():
     if request.method == "POST":
-        # TODO save changes to profile
+        # check valid inputs
+
+        # check age
+        age = str(request.form.get("age"))
+        try:
+            age = int(age)
+        except:
+            age = None
+
+        if age is not None and age not in range(1, 120):
+            flash("Invalid age.")
+            return redirect("/profile")
+        elif age is None:
+            age = "NULL"
+        
+        # check valid country
+        countries = [
+        "", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
+        "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
+        "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
+        "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso",
+        "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic",
+        "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Cote d'Ivoire",
+        "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica",
+        "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
+        "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia",
+        "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+        "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
+        "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati",
+        "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon",
+        "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi",
+        "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico",
+        "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+        "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria",
+        "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea",
+        "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda",
+        "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
+        "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore",
+        "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka",
+        "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand",
+        "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+        "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+        "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+        ]
+
+        country = str(request.form.get("country"))
+        if country not in countries:
+            flash("Invalid country.")
+            return redirect("/profile")
+        if country == "":
+            country = "NULL"
+
+
+        # check gender
+        gender_options = ["","Male", "Female", "Non-binary", "Other"]
+        gender = str(request.form.get("gender"))
+
+        if gender not in gender_options:
+            flash("No such gender option.")
+            return redirect("/profile")
+        if gender == "":
+            gender = "NULL"
+
+        
+        # check sexuality
+        sexualities = ["","Male", "Female", "Non-binary", "Other"]
+        sexuality = str(request.form.get("sexuality"))
+
+        if sexuality not in sexualities:
+            flash("No such sexuality option.")
+            return redirect("/profile")
+        if sexuality == "":
+            sexuality = "NULL"
+
+        
+        # check politics
+        political_leanings = ["","Center", "Left", "Right", "Other"]
+        politics = str(request.form.get("politics"))
+
+        if politics not in political_leanings:
+            flash("No such politics option.")
+            return redirect("/profile")
+        if politics == "":
+            politics = "NULL"
+
+
+        # check language
+        languages =  [
+                        "", "Afrikaans", "Amharic", "Arabic", "Azerbaijani", "Bengali", "Burmese", 
+                        "Chinese", "Czech", "Danish", "Dutch", "English", "Finnish", "French", 
+                        "German", "Greek", "Hebrew", "Hindi", "Hungarian", "Indonesian", "Italian", 
+                        "Japanese", "Kannada", "Korean", "Malay", "Malayalam", "Marathi", "Navajo", 
+                        "Nepali", "Norwegian", "Persian", "Polish", "Portuguese", "Punjabi", 
+                        "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", "Spanish", 
+                        "Swahili", "Swedish", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", 
+                        "Urdu", "Vietnamese", "Xhosa", "Yoruba", "Zulu", "Other"
+                    ]
+        native_language = str(request.form.get("language"))
+
+        if native_language not in languages:
+            flash("No such language option.")
+            return redirect("/profile")
+        if native_language == "":
+            native_language = "NULL"
+
+
+
+        # Connect to the database
+        connection = sqlite3.connect("amiwrong.db")
+        # Cursor with which to interact with database
+        cursor = connection.cursor()
+
+        # update profiles table in database
+        cursor.execute("UPDATE profiles SET age = ?, country = ?, gender = ?, sexuality = ?, politics = ?, language = ? WHERE user_id = ?", (age, country, gender, sexuality, politics, native_language, session["user_id"]))
+
+        # commit changes
+        connection.commit()
+        # close connection
+        cursor.close()
+        connection.close()
+
+
         print("Saved changes to profile")
 
         # Refresh page
         return redirect("/profile")
     else:
-        return render_template("profile.html")
+        # Connect to the database
+        connection = sqlite3.connect("amiwrong.db")
+        # Use Row factory to fetch rows as dictionaries
+        connection.row_factory = sqlite3.Row
+        # Cursor with which to interact with database
+        cursor = connection.cursor()
+
+        # Execute a SELECT query to retrieve a row
+        cursor.execute("SELECT * FROM profiles WHERE user_id = ?", (session["user_id"],))
+
+        # Fetch the row as dict
+        row = cursor.fetchone()
+
+        if row:
+            age = row['age']
+            country = row['country']
+            gender = row['gender']
+            sexuality = row['sexuality']
+            politics = row['politics']
+            language = row['language']
+
+        # Close the cursor and connection
+        cursor.close()
+        connection.close()
+        return render_template("profile.html", language=language)
 
 
 #@login_required
