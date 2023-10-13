@@ -274,7 +274,7 @@ def profile():
 
         
         # check sexuality
-        sexualities = ["","Male", "Female", "Non-binary", "Other"]
+        sexualities = ["","Heterosexual", "Homosexual", "Bisexual", "Pansexual", "Asexual", "Other"]
         sexuality = str(request.form.get("sexuality"))
 
         if sexuality not in sexualities:
@@ -360,7 +360,7 @@ def profile():
         # Close the cursor and connection
         cursor.close()
         connection.close()
-        return render_template("profile.html", language=language)
+        return render_template("profile.html", age=age, country=country, gender=gender, sexuality=sexuality, politics=politics, language=language)
 
 
 #@login_required
