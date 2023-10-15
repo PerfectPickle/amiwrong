@@ -208,24 +208,7 @@ def signout():
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    if request.method == "POST":
-        # check valid inputs
-
-        # check age
-        age = str(request.form.get("age"))
-        try:
-            age = int(age)
-        except:
-            age = None
-
-        if age is not None and age not in range(1, 120):
-            flash("Invalid age.")
-            return redirect("/profile")
-        elif age is None:
-            age = "NULL"
-        
-        # check valid country
-        countries = [
+    countries = [
         "", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
         "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
         "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
@@ -254,6 +237,41 @@ def profile():
         "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
         ]
 
+    gender_options = ["","Male", "Female", "Non-binary", "Other"]
+
+    languages =  [
+                    "", "Afrikaans", "Amharic", "Arabic", "Azerbaijani", "Bengali", "Burmese", 
+                    "Chinese", "Czech", "Danish", "Dutch", "English", "Finnish", "French", 
+                    "German", "Greek", "Hebrew", "Hindi", "Hungarian", "Indonesian", "Italian", 
+                    "Japanese", "Kannada", "Korean", "Malay", "Malayalam", "Marathi", "Navajo", 
+                    "Nepali", "Norwegian", "Persian", "Polish", "Portuguese", "Punjabi", 
+                    "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", "Spanish", 
+                    "Swahili", "Swedish", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", 
+                    "Urdu", "Vietnamese", "Xhosa", "Yoruba", "Zulu", "Other"
+                ]
+
+    politics_options = ["","Center", "Left", "Right", "Other"]
+
+    sexualities = ["","Heterosexual", "Homosexual", "Bisexual", "Pansexual", "Asexual", "Other"]
+
+    if request.method == "POST":
+        # check valid inputs
+
+        # check age
+        age = str(request.form.get("age"))
+        try:
+            age = int(age)
+        except:
+            age = None
+
+        if age is not None and age not in range(1, 120):
+            flash("Invalid age.")
+            return redirect("/profile")
+        elif age is None:
+            age = "NULL"
+        
+        # check valid country
+
         country = str(request.form.get("country"))
         if country not in countries:
             flash("Invalid country.")
@@ -263,7 +281,6 @@ def profile():
 
 
         # check gender
-        gender_options = ["","Male", "Female", "Non-binary", "Other"]
         gender = str(request.form.get("gender"))
 
         if gender not in gender_options:
@@ -274,7 +291,6 @@ def profile():
 
         
         # check sexuality
-        sexualities = ["","Heterosexual", "Homosexual", "Bisexual", "Pansexual", "Asexual", "Other"]
         sexuality = str(request.form.get("sexuality"))
 
         if sexuality not in sexualities:
@@ -285,10 +301,9 @@ def profile():
 
         
         # check politics
-        political_leanings = ["","Center", "Left", "Right", "Other"]
         politics = str(request.form.get("politics"))
 
-        if politics not in political_leanings:
+        if politics not in politics_options:
             flash("No such politics option.")
             return redirect("/profile")
         if politics == "":
@@ -296,16 +311,6 @@ def profile():
 
 
         # check language
-        languages =  [
-                        "", "Afrikaans", "Amharic", "Arabic", "Azerbaijani", "Bengali", "Burmese", 
-                        "Chinese", "Czech", "Danish", "Dutch", "English", "Finnish", "French", 
-                        "German", "Greek", "Hebrew", "Hindi", "Hungarian", "Indonesian", "Italian", 
-                        "Japanese", "Kannada", "Korean", "Malay", "Malayalam", "Marathi", "Navajo", 
-                        "Nepali", "Norwegian", "Persian", "Polish", "Portuguese", "Punjabi", 
-                        "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", "Spanish", 
-                        "Swahili", "Swedish", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", 
-                        "Urdu", "Vietnamese", "Xhosa", "Yoruba", "Zulu", "Other"
-                    ]
         native_language = str(request.form.get("language"))
 
         if native_language not in languages:
@@ -360,7 +365,7 @@ def profile():
         # Close the cursor and connection
         cursor.close()
         connection.close()
-        return render_template("profile.html", age=age, country=country, gender=gender, sexuality=sexuality, politics=politics, language=language)
+        return render_template("profile.html", age=age, country=country, countries=countries, gender=gender, gender_options=gender_options, sexuality=sexuality, sexualities=sexualities, politics=politics, politics_options=politics_options, language=language, languages=languages)
 
 
 #@login_required

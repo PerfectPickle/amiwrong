@@ -1,34 +1,74 @@
-{% extends "layout.html" %}
-
-{% block title %}
-Create a poll
-{% endblock %}
-
-{% block main %}
+{% extends "layout.html" %} {% block title %} Create a poll {% endblock %} {%
+block main %}
 
 <h1>Create A Poll</h1>
 
-<form action="/create" method="post" class="pt-5 d-flex flex-column align-items-center">
-    <div class="mb-3">
-        <input autocomplete="off" autofocus class="form-control mx-auto w-auto form-field" id="username" name="username"
-            placeholder="Poll name" type="text">
-    </div>
-    <div class="mb-3">
-        <input class="form-control mx-auto w-auto form-field" id="password" name="password" placeholder="Password"
-            type="Confidnce">
-    </div>
-    <button class="btn btn-primary form-btn" type="submit">Create Poll</button>
+<form
+  action="/create"
+  method="post"
+  class="pt-5 d-flex flex-column align-items-center"
+>
+  <div class="mb-3">
+    <input
+      autocomplete="off"
+      autofocus
+      class="form-control mx-auto w-auto form-field"
+      id="pollName"
+      name="pollName"
+      placeholder="Poll Name"
+      type="text"
+    />
+  </div>
+  <div class="mb-3">
+    <select
+      class="form-select form-control mx-auto w-auto form-field"
+      id="questionType"
+      name="questionType"
+    >
+      <option value="" selected disabled>Select Question Type</option>
+      <option value="moreLess">Do more people prefer...</option>
+      <option value="averageComparison">Is the average...?</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <select
+      class="form-select form-control mx-auto w-auto form-field"
+      id="demographicGroup"
+      name="demographicGroup"
+    >
+      <option value="" selected disabled>
+        Select Demographic Group (Optional)
+      </option>
+      <option value="age">Age</option>
+      <option value="gender">Gender</option>
+      <option value="location">Location</option>
+      <option value="interest">Interest</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <textarea
+      class="form-control mx-auto w-auto form-field"
+      id="nullHypothesis"
+      name="nullHypothesis"
+      placeholder="Null Hypothesis"
+    ></textarea>
+  </div>
+  <div class="mb-3">
+    <textarea
+      class="form-control mx-auto w-auto form-field"
+      id="alternativeHypothesis"
+      name="alternativeHypothesis"
+      placeholder="Alternative Hypothesis"
+    ></textarea>
+  </div>
+  <button class="btn btn-primary form-btn" type="submit">Create Poll</button>
 </form>
 
 <!-- to display flash messages -->
-{% with messages = get_flashed_messages() %}
-{% if messages %}
+{% with messages = get_flashed_messages() %} {% if messages %}
 <ul class="flashes">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
+  {% for message in messages %}
+  <li>{{ message }}</li>
+  {% endfor %}
 </ul>
-{% endif %}
-{% endwith %}
-
-{% endblock %}
+{% endif %} {% endwith %} {% endblock %}

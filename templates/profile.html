@@ -1,6 +1,8 @@
 {% extends "layout.html" %} {% block title %} My Profile {% endblock %} {% block
 main %}
 
+<!-- TODO : Use jinja loops to make options instead of manual html lines -->
+
 <h1>Save Common Details For Future Polls</h1>
 <small class="form-text text-muted"
   >This information will be provided to polls you participate in, without any
@@ -25,296 +27,44 @@ main %}
   <div class="form-group">
     <label for="country">Country</label>
     <select class="form-control" id="country" name="country">
-      <option value="" {% if country == '' %}selected{% endif %}></option>
-      <option value="Afghanistan" {% if country == 'Afghanistan' %}selected{% endif %}>Afghanistan</option>
-      <option value="Albania" {% if country == 'Albania' %}selected{% endif %}>Albania</option>
-      <option value="Algeria" {% if country == 'Algeria' %}selected{% endif %}>Algeria</option>
-      <option value="Andorra" {% if country == 'Andorra' %}selected{% endif %}>Andorra</option>
-      <option value="Angola" {% if country == 'Angola' %}selected{% endif %}>Angola</option>
-      <option value="Antigua and Barbuda" {% if country == 'Antigua and Barbuda' %}selected{% endif %}>Antigua and Barbuda</option>
-      <option value="Argentina" {% if country == 'Argentina' %}selected{% endif %}>Argentina</option>
-      <option value="Armenia" {% if country == 'Armenia' %}selected{% endif %}>Armenia</option>
-      <option value="Australia" {% if country == 'Australia' %}selected{% endif %}>Australia</option>
-      <option value="Austria" {% if country == 'Austria' %}selected{% endif %}>Austria</option>
-      <option value="Azerbaijan" {% if country == 'Azerbaijan' %}selected{% endif %}>Azerbaijan</option>
-      <option value="Bahamas" {% if country == 'Bahamas' %}selected{% endif %}>Bahamas</option>
-      <option value="Bahrain" {% if country == 'Bahrain' %}selected{% endif %}>Bahrain</option>
-      <option value="Bangladesh" {% if country == 'Bangladesh' %}selected{% endif %}>Bangladesh</option>
-      <option value="Barbados" {% if country == 'Barbados' %}selected{% endif %}>Barbados</option>
-      <option value="Belarus" {% if country == 'Belarus' %}selected{% endif %}>Belarus</option>
-      <option value="Belgium" {% if country == 'Belgium' %}selected{% endif %}>Belgium</option>
-      <option value="Belize" {% if country == 'Belize' %}selected{% endif %}>Belize</option>
-      <option value="Benin" {% if country == 'Benin' %}selected{% endif %}>Benin</option>
-      <option value="Bhutan" {% if country == 'Bhutan' %}selected{% endif %}>Bhutan</option>
-      <option value="Bolivia" {% if country == 'Bolivia' %}selected{% endif %}>Bolivia</option>
-      <option value="Bosnia and Herzegovina" {% if country == 'Bosnia and Herzegovina' %}selected{% endif %}>Bosnia and Herzegovina</option>
-      <option value="Botswana" {% if country == 'Botswana' %}selected{% endif %}>Botswana</option>
-      <option value="Brazil" {% if country == 'Brazil' %}selected{% endif %}>Brazil</option>
-      <option value="Brunei" {% if country == 'Brunei' %}selected{% endif %}>Brunei</option>
-      <option value="Bulgaria" {% if country == 'Bulgaria' %}selected{% endif %}>Bulgaria</option>
-      <option value="Burkina Faso" {% if country == 'Burkina Faso' %}selected{% endif %}>Burkina Faso</option>
-      <option value="Burundi" {% if country == 'Burundi' %}selected{% endif %}>Burundi</option>
-      <option value="Cabo Verde" {% if country == 'Cabo Verde' %}selected{% endif %}>Cabo Verde</option>
-      <option value="Cambodia" {% if country == 'Cambodia' %}selected{% endif %}>Cambodia</option>
-      <option value="Cameroon" {% if country == 'Cameroon' %}selected{% endif %}>Cameroon</option>
-      <option value="Canada" {% if country == 'Canada' %}selected{% endif %}>Canada</option>
-      <option value="Central African Republic" {% if country == 'Central African Republic' %}selected{% endif %}>Central African Republic</option>
-      <option value="Chad" {% if country == 'Chad' %}selected{% endif %}>Chad</option>
-      <option value="Chile" {% if country == 'Chile' %}selected{% endif %}>Chile</option>
-      <option value="China" {% if country == 'China' %}selected{% endif %}>China</option>
-      <option value="Colombia" {% if country == 'Colombia' %}selected{% endif %}>Colombia</option>
-      <option value="Comoros" {% if country == 'Comoros' %}selected{% endif %}>Comoros</option>
-      <option value="Congo" {% if country == 'Congo' %}selected{% endif %}>Congo</option>
-      <option value="Costa Rica" {% if country == 'Costa Rica' %}selected{% endif %}>Costa Rica</option>
-      <option value="Cote d'Ivoire" {% if country == "Cote d'Ivoire" %}selected{% endif %}>Cote d'Ivoire</option>
-      <option value="Croatia" {% if country == 'Croatia' %}selected{% endif %}>Croatia</option>
-      <option value="Cuba" {% if country == 'Cuba' %}selected{% endif %}>Cuba</option>
-      <option value="Cyprus" {% if country == 'Cyprus' %}selected{% endif %}>Cyprus</option>
-      <option value="Czech Republic" {% if country == 'Czech Republic' %}selected{% endif %}>Czech Republic</option>
-      <option value="Denmark" {% if country == 'Denmark' %}selected{% endif %}>Denmark</option>
-      <option value="Djibouti" {% if country == 'Djibouti' %}selected{% endif %}>Djibouti</option>
-      <option value="Dominica" {% if country == 'Dominica' %}selected{% endif %}>Dominica</option>
-      <option value="Dominican Republic" {% if country == 'Dominican Republic' %}selected{% endif %}>Dominican Republic</option>
-      <option value="Ecuador" {% if country == 'Ecuador' %}selected{% endif %}>Ecuador</option>
-      <option value="Egypt" {% if country == 'Egypt' %}selected{% endif %}>Egypt</option>
-      <option value="El Salvador" {% if country == 'El Salvador' %}selected{% endif %}>El Salvador</option>
-      <option value="Equatorial Guinea" {% if country == 'Equatorial Guinea' %}selected{% endif %}>Equatorial Guinea</option>
-      <option value="Eritrea" {% if country == 'Eritrea' %}selected{% endif %}>Eritrea</option>
-      <option value="Estonia" {% if country == 'Estonia' %}selected{% endif %}>Estonia</option>
-      <option value="Eswatini" {% if country == 'Eswatini' %}selected{% endif %}>Eswatini</option>
-      <option value="Ethiopia" {% if country == 'Ethiopia' %}selected{% endif %}>Ethiopia</option>
-      <option value="Fiji" {% if country == 'Fiji' %}selected{% endif %}>Fiji</option>
-      <option value="Finland" {% if country == 'Finland' %}selected{% endif %}>Finland</option>
-      <option value="France" {% if country == 'France' %}selected{% endif %}>France</option>
-      <option value="Gabon" {% if country == 'Gabon' %}selected{% endif %}>Gabon</option>
-      <option value="Gambia" {% if country == 'Gambia' %}selected{% endif %}>Gambia</option>
-      <option value="Georgia" {% if country == 'Georgia' %}selected{% endif %}>Georgia</option>
-      <option value="Germany" {% if country == 'Germany' %}selected{% endif %}>Germany</option>
-      <option value="Ghana" {% if country == 'Ghana' %}selected{% endif %}>Ghana</option>
-      <option value="Greece" {% if country == 'Greece' %}selected{% endif %}>Greece</option>
-      <option value="Grenada" {% if country == 'Grenada' %}selected{% endif %}>Grenada</option>
-      <option value="Guatemala" {% if country == 'Guatemala' %}selected{% endif %}>Guatemala</option>
-      <option value="Guinea" {% if country == 'Guinea' %}selected{% endif %}>Guinea</option>
-      <option value="Guinea-Bissau" {% if country == 'Guinea-Bissau' %}selected{% endif %}>Guinea-Bissau</option>
-      <option value="Guyana" {% if country == 'Guyana' %}selected{% endif %}>Guyana</option>
-      <option value="Haiti" {% if country == 'Haiti' %}selected{% endif %}>Haiti</option>
-      <option value="Honduras" {% if country == 'Honduras' %}selected{% endif %}>Honduras</option>
-      <option value="Hungary" {% if country == 'Hungary' %}selected{% endif %}>Hungary</option>
-      <option value="Iceland" {% if country == 'Iceland' %}selected{% endif %}>Iceland</option>
-      <option value="India" {% if country == 'India' %}selected{% endif %}>India</option>
-      <option value="Indonesia" {% if country == 'Indonesia' %}selected{% endif %}>Indonesia</option>
-      <option value="Iran" {% if country == 'Iran' %}selected{% endif %}>Iran</option>
-      <option value="Iraq" {% if country == 'Iraq' %}selected{% endif %}>Iraq</option>
-      <option value="Ireland" {% if country == 'Ireland' %}selected{% endif %}>Ireland</option>
-      <option value="Israel" {% if country == 'Israel' %}selected{% endif %}>Israel</option>
-      <option value="Italy" {% if country == 'Italy' %}selected{% endif %}>Italy</option>
-      <option value="Jamaica" {% if country == 'Jamaica' %}selected{% endif %}>Jamaica</option>
-      <option value="Japan" {% if country == 'Japan' %}selected{% endif %}>Japan</option>
-      <option value="Jordan" {% if country == 'Jordan' %}selected{% endif %}>Jordan</option>
-      <option value="Kazakhstan" {% if country == 'Kazakhstan' %}selected{% endif %}>Kazakhstan</option>
-      <option value="Kenya" {% if country == 'Kenya' %}selected{% endif %}>Kenya</option>
-      <option value="Kiribati" {% if country == 'Kiribati' %}selected{% endif %}>Kiribati</option>
-      <option value="Korea, North" {% if country == 'Korea, North' %}selected{% endif %}>Korea, North</option>
-      <option value="Korea, South" {% if country == 'Korea, South' %}selected{% endif %}>Korea, South</option>
-      <option value="Kosovo" {% if country == 'Kosovo' %}selected{% endif %}>Kosovo</option>
-      <option value="Kuwait" {% if country == 'Kuwait' %}selected{% endif %}>Kuwait</option>
-      <option value="Kyrgyzstan" {% if country == 'Kyrgyzstan' %}selected{% endif %}>Kyrgyzstan</option>
-      <option value="Laos" {% if country == 'Laos' %}selected{% endif %}>Laos</option>  
-      <option value="Latvia" {% if country == 'Latvia' %}selected{% endif %}>Latvia</option>
-      <option value="Lebanon" {% if country == 'Lebanon' %}selected{% endif %}>Lebanon</option>
-      <option value="Lesotho" {% if country == 'Lesotho' %}selected{% endif %}>Lesotho</option>
-      <option value="Liberia" {% if country == 'Liberia' %}selected{% endif %}>Liberia</option>
-      <option value="Libya" {% if country == 'Libya' %}selected{% endif %}>Libya</option>
-      <option value="Liechtenstein" {% if country == 'Liechtenstein' %}selected{% endif %}>Liechtenstein</option>
-      <option value="Lithuania" {% if country == 'Lithuania' %}selected{% endif %}>Lithuania</option>
-      <option value="Luxembourg" {% if country == 'Luxembourg' %}selected{% endif %}>Luxembourg</option>
-      <option value="Madagascar" {% if country == 'Madagascar' %}selected{% endif %}>Madagascar</option>
-      <option value="Malawi" {% if country == 'Malawi' %}selected{% endif %}>Malawi</option>
-      <option value="Malaysia" {% if country == 'Malaysia' %}selected{% endif %}>Malaysia</option>
-      <option value="Maldives" {% if country == 'Maldives' %}selected{% endif %}>Maldives</option>
-      <option value="Mali" {% if country == 'Mali' %}selected{% endif %}>Mali</option>
-      <option value="Malta" {% if country == 'Malta' %}selected{% endif %}>Malta</option>
-      <option value="Marshall Islands" {% if country == 'Marshall Islands' %}selected{% endif %}>Marshall Islands</option>
-      <option value="Mauritania" {% if country == 'Mauritania' %}selected{% endif %}>Mauritania</option>
-      <option value="Mauritius" {% if country == 'Mauritius' %}selected{% endif %}>Mauritius</option>
-      <option value="Mexico" {% if country == 'Mexico' %}selected{% endif %}>Mexico</option>
-      <option value="Micronesia" {% if country == 'Micronesia' %}selected{% endif %}>Micronesia</option>
-      <option value="Moldova" {% if country == 'Moldova' %}selected{% endif %}>Moldova</option>
-      <option value="Monaco" {% if country == 'Monaco' %}selected{% endif %}>Monaco</option>
-      <option value="Mongolia" {% if country == 'Mongolia' %}selected{% endif %}>Mongolia</option>
-      <option value="Montenegro" {% if country == 'Montenegro' %}selected{% endif %}>Montenegro</option>
-      <option value="Morocco" {% if country == 'Morocco' %}selected{% endif %}>Morocco</option>
-      <option value="Mozambique" {% if country == 'Mozambique' %}selected{% endif %}>Mozambique</option>
-      <option value="Myanmar" {% if country == 'Myanmar' %}selected{% endif %}>Myanmar</option>
-      <option value="Namibia" {% if country == 'Namibia' %}selected{% endif %}>Namibia</option>
-      <option value="Nauru" {% if country == 'Nauru' %}selected{% endif %}>Nauru</option>
-      <option value="Nepal" {% if country == 'Nepal' %}selected{% endif %}>Nepal</option>
-      <option value="Netherlands" {% if country == 'Netherlands' %}selected{% endif %}>Netherlands</option>
-      <option value="New Zealand" {% if country == 'New Zealand' %}selected{% endif %}>New Zealand</option>
-      <option value="Nicaragua" {% if country == 'Nicaragua' %}selected{% endif %}>Nicaragua</option>
-      <option value="Niger" {% if country == 'Niger' %}selected{% endif %}>Niger</option>
-      <option value="Nigeria" {% if country == 'Nigeria' %}selected{% endif %}>Nigeria</option>
-      <option value="North Macedonia" {% if country == 'North Macedonia' %}selected{% endif %}>North Macedonia</option>
-      <option value="Norway" {% if country == 'Norway' %}selected{% endif %}>Norway</option>
-      <option value="Oman" {% if country == 'Oman' %}selected{% endif %}>Oman</option>
-      <option value="Pakistan" {% if country == 'Pakistan' %}selected{% endif %}>Pakistan</option>
-      <option value="Palau" {% if country == 'Palau' %}selected{% endif %}>Palau</option>
-      <option value="Palestine" {% if country == 'Palestine' %}selected{% endif %}>Palestine</option>
-      <option value="Panama" {% if country == 'Panama' %}selected{% endif %}>Panama</option>
-      <option value="Papua New Guinea" {% if country == 'Papua New Guinea' %}selected{% endif %}>Papua New Guinea</option>
-      <option value="Paraguay" {% if country == 'Paraguay' %}selected{% endif %}>Paraguay</option>
-      <option value="Peru" {% if country == 'Peru' %}selected{% endif %}>Peru</option>
-      <option value="Philippines" {% if country == 'Philippines' %}selected{% endif %}>Philippines</option>
-      <option value="Poland" {% if country == 'Poland' %}selected{% endif %}>Poland</option>
-      <option value="Portugal" {% if country == 'Portugal' %}selected{% endif %}>Portugal</option>
-      <option value="Qatar" {% if country == 'Qatar' %}selected{% endif %}>Qatar</option>
-      <option value="Romania" {% if country == 'Romania' %}selected{% endif %}>Romania</option>
-      <option value="Russia" {% if country == 'Russia' %}selected{% endif %}>Russia</option>
-      <option value="Rwanda" {% if country == 'Rwanda' %}selected{% endif %}>Rwanda</option>
-      <option value="Saint Kitts and Nevis" {% if country == 'Saint Kitts and Nevis' %}selected{% endif %}>Saint Kitts and Nevis</option>
-      <option value="Saint Lucia" {% if country == 'Saint Lucia' %}selected{% endif %}>Saint Lucia</option>
-      <option value="Saint Vincent and the Grenadines" {% if country == 'Saint Vincent and the Grenadines' %}selected{% endif %}>Saint Vincent and the Grenadines</option>
-      <option value="Samoa" {% if country == 'Samoa' %}selected{% endif %}>Samoa</option>
-      <option value="San Marino" {% if country == 'San Marino' %}selected{% endif %}>San Marino</option>
-      <option value="Sao Tome and Principe" {% if country == 'Sao Tome and Principe' %}selected{% endif %}>Sao Tome and Principe</option>
-      <option value="Saudi Arabia" {% if country == 'Saudi Arabia' %}selected{% endif %}>Saudi Arabia</option>
-      <option value="Senegal" {% if country == 'Senegal' %}selected{% endif %}>Senegal</option>
-      <option value="Serbia" {% if country == 'Serbia' %}selected{% endif %}>Serbia</option>
-      <option value="Seychelles" {% if country == 'Seychelles' %}selected{% endif %}>Seychelles</option>
-      <option value="Sierra Leone" {% if country == 'Sierra Leone' %}selected{% endif %}>Sierra Leone</option>
-      <option value="Singapore" {% if country == 'Singapore' %}selected{% endif %}>Singapore</option>
-      <option value="Slovakia" {% if country == 'Slovakia' %}selected{% endif %}>Slovakia</option>
-      <option value="Slovenia" {% if country == 'Slovenia' %}selected{% endif %}>Slovenia</option>
-      <option value="Solomon Islands" {% if country == 'Solomon Islands' %}selected{% endif %}>Solomon Islands</option>
-      <option value="Somalia" {% if country == 'Somalia' %}selected{% endif %}>Somalia</option>
-      <option value="South Africa" {% if country == 'South Africa' %}selected{% endif %}>South Africa</option>
-      <option value="South Sudan" {% if country == 'South Sudan' %}selected{% endif %}>South Sudan</option>
-      <option value="Spain" {% if country == 'Spain' %}selected{% endif %}>Spain</option>
-      <option value="Sri Lanka" {% if country == 'Sri Lanka' %}selected{% endif %}>Sri Lanka</option>
-      <option value="Sudan" {% if country == 'Sudan' %}selected{% endif %}>Sudan</option>
-      <option value="Suriname" {% if country == 'Suriname' %}selected{% endif %}>Suriname</option>
-      <option value="Sweden" {% if country == 'Sweden' %}selected{% endif %}>Sweden</option>
-      <option value="Switzerland" {% if country == 'Switzerland' %}selected{% endif %}>Switzerland</option>
-      <option value="Syria" {% if country == 'Syria' %}selected{% endif %}>Syria</option>
-      <option value="Taiwan" {% if country == 'Taiwan' %}selected{% endif %}>Taiwan</option>
-      <option value="Tajikistan" {% if country == 'Tajikistan' %}selected{% endif %}>Tajikistan</option>
-      <option value="Tanzania" {% if country == 'Tanzania' %}selected{% endif %}>Tanzania</option>
-      <option value="Thailand" {% if country == 'Thailand' %}selected{% endif %}>Thailand</option>
-      <option value="Timor-Leste" {% if country == 'Timor-Leste' %}selected{% endif %}>Timor-Leste</option>
-      <option value="Togo" {% if country == 'Togo' %}selected{% endif %}>Togo</option>
-      <option value="Tonga" {% if country == 'Tonga' %}selected{% endif %}>Tonga</option>
-      <option value="Trinidad and Tobago" {% if country == 'Trinidad and Tobago' %}selected{% endif %}>Trinidad and Tobago</option>
-      <option value="Tunisia" {% if country == 'Tunisia' %}selected{% endif %}>Tunisia</option>
-      <option value="Turkey" {% if country == 'Turkey' %}selected{% endif %}>Turkey</option>
-      <option value="Turkmenistan" {% if country == 'Turkmenistan' %}selected{% endif %}>Turkmenistan</option>
-      <option value="Tuvalu" {% if country == 'Tuvalu' %}selected{% endif %}>Tuvalu</option>
-      <option value="Uganda" {% if country == 'Uganda' %}selected{% endif %}>Uganda</option>
-      <option value="Ukraine" {% if country == 'Ukraine' %}selected{% endif %}>Ukraine</option>
-      <option value="United Arab Emirates" {% if country == 'United Arab Emirates' %}selected{% endif %}>United Arab Emirates</option>
-      <option value="United Kingdom" {% if country == 'United Kingdom' %}selected{% endif %}>United Kingdom</option>
-      <option value="United States" {% if country == 'United States' %}selected{% endif %}>United States</option>
-      <option value="Uruguay" {% if country == 'Uruguay' %}selected{% endif %}>Uruguay</option>
-      <option value="Uzbekistan" {% if country == 'Uzbekistan' %}selected{% endif %}>Uzbekistan</option>
-      <option value="Vanuatu" {% if country == 'Vanuatu' %}selected{% endif %}>Vanuatu</option>
-      <option value="Vatican City" {% if country == 'Vatican City' %}selected{% endif %}>Vatican City</option>
-      <option value="Venezuela" {% if country == 'Venezuela' %}selected{% endif %}>Venezuela</option>
-      <option value="Vietnam" {% if country == 'Vietnam' %}selected{% endif %}>Vietnam</option>
-      <option value="Yemen" {% if country == 'Yemen' %}selected{% endif %}>Yemen</option>
-      <option value="Zambia" {% if country == 'Zambia' %}selected{% endif %}>Zambia</option>
-      <option value="Zimbabwe" {% if country == 'Zimbabwe' %}selected{% endif %}>Zimbabwe</option>
+      {% for c in countries %}
+        <option value="{{ c }}" {% if country == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
     </select>
     
   </div>
   <div class="form-group">
     <label for="gender">Gender</label>
     <select class="form-control" id="gender" name="gender">
-      <option value="" {% if gender == '' %}selected{% endif %}></option>
-      <option value="Male" {% if gender == 'Male' %}selected{% endif %}>Male</option>
-      <option value="Female" {% if gender == 'Female' %}selected{% endif %}>Female</option>
-      <option value="Non-binary" {% if gender == 'Non-binary' %}selected{% endif %}>Non-binary</option>
-      <option value="Other" {% if gender == 'Other' %}selected{% endif %}>Other</option>
-  </select>
+      {% for g in gender_options %}
+        <option value="{{ g }}" {% if gender == g %}selected{% endif %}>{{ g }}</option>
+      {% endfor %}
+    </select>
   
   </div>
   <div class="form-group">
     <label for="sexuality">Sexuality</label>
     <select class="form-control" id="sexuality" name="sexuality">
-      <option value="" {% if sexuality == '' %}selected{% endif %}></option>
-      <option value="Heterosexual" {% if sexuality == 'Heterosexual' %}selected{% endif %}>Heterosexual</option>
-      <option value="Homosexual" {% if sexuality == 'Homosexual' %}selected{% endif %}>Homosexual</option>
-      <option value="Bisexual" {% if sexuality == 'Bisexual' %}selected{% endif %}>Bisexual</option>
-      <option value="Pansexual" {% if sexuality == 'Pansexual' %}selected{% endif %}>Pansexual</option>
-      <option value="Asexual" {% if sexuality == 'Asexual' %}selected{% endif %}>Asexual</option>
-      <option value="Other" {% if sexuality == 'Other' %}selected{% endif %}>Other</option>
-  </select>
+      {% for s in sexualities %}
+        <option value="{{ s }}" {% if sexuality == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
   
   <div class="form-group">
     <label for="politics">Politics</label>
     <select class="form-control" id="politics" name="politics">
-      <option value="" {% if politics == '' %}selected{% endif %}></option>
-      <option value="Center" {% if politics == 'Center' %}selected{% endif %}>Center</option>
-      <option value="Left" {% if politics == 'Left' %}selected{% endif %}>Left</option>
-      <option value="Right" {% if politics == 'Right' %}selected{% endif %}>Right</option>
-      <option value="Other" {% if politics == 'Other' %}selected{% endif %}>Other</option>
+      {% for p in politics_options %}
+        <option value="{{ p }}" {% if politics == p %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
   </select>
   
   </div>
   <div class="form-group">
     <label for="language">Language</label>
     <select class="form-control" id="language" name="language">
-      <option value=""></option>
-      <option value="Afrikaans" {% if language == 'Afrikaans' %}selected{% endif %}>Afrikaans</option>
-      <option value="Amharic" {% if language == 'Amharic' %}selected{% endif %}>Amharic</option>
-      <option value="Arabic" {% if language == 'Arabic' %}selected{% endif %}>Arabic</option>
-      <option value="Azerbaijani" {% if language == 'Azerbaijani' %}selected{% endif %}>Azerbaijani</option>
-      <option value="Bengali" {% if language == 'Bengali' %}selected{% endif %}>Bengali</option>
-      <option value="Burmese" {% if language == 'Burmese' %}selected{% endif %}>Burmese</option>
-      <option value="Chinese" {% if language == 'Chinese' %}selected{% endif %}>Chinese</option>
-      <option value="Czech" {% if language == 'Czech' %}selected{% endif %}>Czech</option>
-      <option value="Danish" {% if language == 'Danish' %}selected{% endif %}>Danish</option>
-      <option value="Dutch" {% if language == 'Dutch' %}selected{% endif %}>Dutch</option>
-      <option value="English" {% if language == 'English' %}selected{% endif %}>English</option>
-      <option value="Finnish" {% if language == 'Finnish' %}selected{% endif %}>Finnish</option>
-      <option value="French" {% if language == 'French' %}selected{% endif %}>French</option>
-      <option value="German" {% if language == 'German' %}selected{% endif %}>German</option>
-      <option value="Greek" {% if language == 'Greek' %}selected{% endif %}>Greek</option>
-      <option value="Hebrew" {% if language == 'Hebrew' %}selected{% endif %}>Hebrew</option>
-      <option value="Hindi" {% if language == 'Hindi' %}selected{% endif %}>Hindi</option>
-      <option value="Hungarian" {% if language == 'Hungarian' %}selected{% endif %}>Hungarian</option>
-      <option value="Indonesian" {% if language == 'Indonesian' %}selected{% endif %}>Indonesian</option>
-      <option value="Italian" {% if language == 'Italian' %}selected{% endif %}>Italian</option>
-      <option value="Japanese" {% if language == 'Japanese' %}selected{% endif %}>Japanese</option>
-      <option value="Kannada" {% if language == 'Kannada' %}selected{% endif %}>Kannada</option>
-      <option value="Korean" {% if language == 'Korean' %}selected{% endif %}>Korean</option>
-      <option value="Malay" {% if language == 'Malay' %}selected{% endif %}>Malay</option>
-      <option value="Malayalam" {% if language == 'Malayalam' %}selected{% endif %}>Malayalam</option>
-      <option value="Marathi" {% if language == 'Marathi' %}selected{% endif %}>Marathi</option>
-      <option value="Navajo" {% if language == 'Navajo' %}selected{% endif %}>Navajo</option>
-      <option value="Nepali" {% if language == 'Nepali' %}selected{% endif %}>Nepali</option>
-      <option value="Norwegian" {% if language == 'Norwegian' %}selected{% endif %}>Norwegian</option>
-      <option value="Persian" {% if language == 'Persian' %}selected{% endif %}>Persian</option>
-      <option value="Polish" {% if language == 'Polish' %}selected{% endif %}>Polish</option>
-      <option value="Portuguese" {% if language == 'Portuguese' %}selected{% endif %}>Portuguese</option>
-      <option value="Punjabi" {% if language == 'Punjabi' %}selected{% endif %}>Punjabi</option>
-      <option value="Romanian" {% if language == 'Romanian' %}selected{% endif %}>Romanian</option>
-      <option value="Russian" {% if language == 'Russian' %}selected{% endif %}>Russian</option>
-      <option value="Serbian" {% if language == 'Serbian' %}selected{% endif %}>Serbian</option>
-      <option value="Slovak" {% if language == 'Slovak' %}selected{% endif %}>Slovak</option>
-      <option value="Slovenian" {% if language == 'Slovenian' %}selected{% endif %}>Slovenian</option>
-      <option value="Spanish" {% if language == 'Spanish' %}selected{% endif %}>Spanish</option>
-      <option value="Swahili" {% if language == 'Swahili' %}selected{% endif %}>Swahili</option>
-      <option value="Swedish" {% if language == 'Swedish' %}selected{% endif %}>Swedish</option>
-      <option value="Tamil" {% if language == 'Tamil' %}selected{% endif %}>Tamil</option>
-      <option value="Telugu" {% if language == 'Telugu' %}selected{% endif %}>Telugu</option>
-      <option value="Thai" {% if language == 'Thai' %}selected{% endif %}>Thai</option>
-      <option value="Turkish" {% if language == 'Turkish' %}selected{% endif %}>Turkish</option>
-      <option value="Ukrainian" {% if language == 'Ukrainian' %}selected{% endif %}>Ukrainian</option>
-      <option value="Urdu" {% if language == 'Urdu' %}selected{% endif %}>Urdu</option>
-      <option value="Vietnamese" {% if language == 'Vietnamese' %}selected{% endif %}>Vietnamese</option>
-      <option value="Xhosa" {% if language == 'Xhosa' %}selected{% endif %}>Xhosa</option>
-      <option value="Yoruba" {% if language == 'Yoruba' %}selected{% endif %}>Yoruba</option>
-      <option value="Zulu" {% if language == 'Zulu' %}selected{% endif %}>Zulu</option>
-      <option value="Other" {% if language == 'Other' %}selected{% endif %}>Other</option>
+      {% for l in languages %}
+        <option value="{{ l }}" {% if language == l %}selected{% endif %}>{{ l }}</option>
+      {% endfor %}
     </select>
   </div>
 
