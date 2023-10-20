@@ -191,7 +191,11 @@ def create():
     if request.method == "POST":
         return redirect("/")
     else:
-        return render_template("create.html")
+        demographics = ["Age", "Gender", "Location", "Interest"]  # Modify as per your requirements
+        max_choices = 5  # example value, you can set this as per your requirements
+        max_custom_demo_options = 3  # example value, adjust as needed
+        return render_template("create.html", demographics=demographics, max_choices=max_choices, max_custom_demo_options=max_custom_demo_options)
+
 
 @app.route("/signout", methods=["GET", "POST"])
 @login_required
