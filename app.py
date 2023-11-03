@@ -1,11 +1,137 @@
 import os
 import sqlite3
 import bcrypt
+import random
+import string
 
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 
 from functools import wraps
+
+import random
+import string
+
+### Global variables
+
+countries = [
+        "", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
+        "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
+        "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
+        "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso",
+        "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic",
+        "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Cote d'Ivoire",
+        "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica",
+        "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
+        "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia",
+        "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+        "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
+        "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati",
+        "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon",
+        "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi",
+        "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico",
+        "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+        "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria",
+        "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea",
+        "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda",
+        "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
+        "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore",
+        "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka",
+        "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand",
+        "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+        "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+        "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+        ]
+
+gender_options = ["","Male", "Female", "Non-binary", "Other"]
+
+languages =  [
+            "", "Afrikaans", "Amharic", "Arabic", "Azerbaijani", "Bengali", "Burmese", 
+            "Chinese", "Czech", "Danish", "Dutch", "English", "Finnish", "French", 
+            "German", "Greek", "Hebrew", "Hindi", "Hungarian", "Indonesian", "Italian", 
+            "Japanese", "Kannada", "Korean", "Malay", "Malayalam", "Marathi", "Navajo", 
+            "Nepali", "Norwegian", "Persian", "Polish", "Portuguese", "Punjabi", 
+            "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", "Spanish", 
+            "Swahili", "Swedish", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", 
+            "Urdu", "Vietnamese", "Xhosa", "Yoruba", "Zulu", "Other"
+        ]
+
+politics_options = ["","Center", "Left", "Right", "Other"]
+
+sexualities = ["","Heterosexual", "Homosexual", "Bisexual", "Pansexual", "Asexual", "Other"] 
+
+###
+
+def generate_unique_id(length=11):
+    characters = string.ascii_letters + string.digits + '-_'
+    return ''.join(random.choice(characters) for i in range(length))
+
+# custom dict factory to use inplace of Sqlite3 Row object
+def dict_factory(cursor, row):
+    fields = [column[0] for column in cursor.description]
+    return {key: value for key, value in zip(fields, row)}
+
+# get poll and answers and vote count (TESTING ONLY) from db
+def get_poll(unique_id):
+    connection = sqlite3.connect("amiwrong.db")
+    # Use Row factory to fetch rows as dictionaries
+    connection.row_factory = dict_factory
+
+    cursor = connection.cursor()
+    poll = cursor.execute("SELECT * FROM polls WHERE unique_id=?;", (unique_id,)).fetchone()
+    my_poll_dict = {}
+    list_of_answer_dicts = cursor.execute("SELECT * FROM answers WHERE poll_id=?;", (poll["id"],)).fetchall()
+    choices = []
+    print(list_of_answer_dicts)
+    for a in list_of_answer_dicts:
+        choices.append(a["answer"])
+    poll["choices"] = choices
+
+    list_of_demo_questions = cursor.execute("SELECT * FROM demographics_options WHERE poll_id=?;", (poll["id"],)).fetchall()
+    preset_demo_questions = {}
+    custom_demographics = []
+    for demo_dict in list_of_demo_questions:
+        # if preset, add to preset dict, else add to custom demo list
+        if str(demo_dict["demographic"]).lower() in ["age", "country", "gender", "sexuality", "language", "politics"]:
+            demo_values = []
+            match str(demo_dict["demographic"]).lower():
+                case "age":
+                    preset_demo_questions["Age"] = [0, 1, 2, 3, 4]
+                case "country":
+                    preset_demo_questions["Country"] = countries
+                case "gender":
+                    preset_demo_questions["Gender"] = gender_options
+                case "sexuality":
+                    preset_demo_questions["Sexuality"] = sexualities
+                case "politics":
+                    preset_demo_questions["Politics"] = politics_options
+                case "language":
+                    preset_demo_questions["Language"] = languages
+                case _:
+                    print(f'Error matching preset demographics for {str(demo_dict["demographic"]).lower()}')
+        else:
+            custom_demographics.append(str(demo_dict["demographic"]))
+
+    poll["demographics"] = preset_demo_questions
+    poll["custom_demographics"] = custom_demographics
+
+
+    # get vote count per answer
+    # for answer in answers:
+    #     vote_count = cursor.execute("SELECT COUNT(*) FROM votes WHERE poll_id=? AND chosen_answer_id=?;", (poll["id"], answer["id"])).fetchone()
+    #     print(answer, vote_count)
+        # answers = []
+        # print(list_of_answer_dicts)
+        # for a in list_of_answer_dicts:
+        #     answers.append(a["answer"])
+        # poll["answers"] = answers
+
+    cursor.close()
+    connection.close()
+    
+    return poll
+
+
 
 # Configure application
 app = Flask(__name__)
@@ -29,6 +155,7 @@ Session(app)
 
 # To execute sqlite3 queries
 #cursor.execute()
+
 
 @app.after_request
 def after_request(response):
@@ -189,12 +316,134 @@ def register():
 def create():
     # poll creation
     if request.method == "POST":
+        # check user hasn't exceeded poll creation limit / constraint. This is an anti-spam measure
+        max_polls_per_day = 3
+
+        # Connect to the database
+        connection = sqlite3.connect("amiwrong.db")
+        # Cursor with which to interact with database
+        cursor = connection.cursor()
+
+        user_polls_made_in_last_day = cursor.execute("SELECT COUNT(*) FROM polls WHERE user_id = ?", (session["user_id"],)).fetchone()[0]
+
+        if user_polls_made_in_last_day >= max_polls_per_day:
+            flash('24 hour poll creation limit ({}) reached.'.format(max_polls_per_day))
+            # close connection
+            cursor.close()
+            connection.close()
+            return redirect("/create")
+
+        # get form inputs
+        question = request.form.get("pollQuestion")
+        assumption = request.form.get("pollAssumption")
+        if len(assumption.strip()) <= 0:
+            assumption = "NULL"
+
+        poll_choices = []
+        i = 1
+        while f"choice{i}" in request.form:
+            choice = request.form.get(f"choice{i}")
+            if choice:  # to prevent empty choices from being added
+                poll_choices.append(choice)
+            i += 1
+
+        custom_demos = []
+        i = 1
+        while f"customDemo{i}" in request.form:
+            demo = request.form.get(f"customDemo{i}")
+            if demo:  # to prevent empty custom demographics from being added
+                custom_demos.append(demo)
+            i += 1
+
+        demographic_options = request.form.getlist('demographicOptions')
+
+        # check question length
+        if len(question) <= 3:
+            flash("Question too short.")
+            # close connection
+            cursor.close()
+            connection.close()
+            return redirect("/create")
+
+        # confirm at least 2 nonempty options
+        choice_counter = 0
+        choices = []
+        for choice in poll_choices:
+            if len(choice) > 0:
+                choices.append(choice)
+        
+        if len(choices) < 2:
+            flash("You must specify at least 2 choices.")
+            # close connection
+            cursor.close()
+            connection.close()
+            return redirect("/create")
+
+        # save to database
+        max_retries = 10
+        retry_count = 0
+
+        while retry_count < max_retries:
+            try:
+                cursor.execute("BEGIN TRANSACTION;") # to prevent concurrency issues especially with cursor.lastrowid
+                cursor.execute("INSERT INTO polls (user_id, unique_id, question, assumption) VALUES (?, ?, ?, ?);", (session["user_id"], generate_unique_id(), question, assumption))
+                poll_id = cursor.lastrowid
+                for choice in choices:
+                    cursor.execute("INSERT INTO answers (poll_id, answer) VALUES (?, ?);", (poll_id, choice))
+                for demo in demographic_options:
+                    cursor.execute("INSERT INTO demographics_options (poll_id, demographic) VALUES (?, ?);", (poll_id, demo))
+
+
+                connection.commit() # commit transaction
+                break
+            except sqlite3.IntegrityError:
+                connection.rollback() # rollback / cancel transaction
+                retry_count += 1
+            except Exception as e:
+                connection.rollback()
+                print(f"Error: {e}")  # or you can use logging
+                break
+
+        if retry_count == max_retries:
+            print("Max retries reached. Poll creation failed.")  # Handle this situation, e.g., by returning an error message to the user
+
+        cursor.close()
+        connection.close()
+
         return redirect("/")
     else:
-        demographics = ["Age", "Gender", "Location", "Interest"]  # Modify as per your requirements
-        max_choices = 5  # example value, you can set this as per your requirements
-        max_custom_demo_options = 3  # example value, adjust as needed
+        demographics = ["Age", "Country", "Gender", "Sexuality", "Politics", "Language"]
+        max_choices = 20
+        max_custom_demo_options = 3 
         return render_template("create.html", demographics=demographics, max_choices=max_choices, max_custom_demo_options=max_custom_demo_options)
+
+
+@app.route("/poll/<unique_id>")
+def view_poll(unique_id):
+    poll = get_poll(unique_id)
+    if not poll:
+        abort(404)  # return a 404 not found response if the poll doesn't exist (triggers decorator)
+    poll = get_poll(unique_id)
+    if not poll:
+        abort(404)  # return a 404 not found response if the poll doesn't exist
+    
+    # if user is not logged in, show poll results
+    if 'user_id' not in session:
+        return render_template('poll_results.html', poll=poll)
+
+    # if user is logged in, check if they have voted on this poll
+    connection = sqlite3.connect("amiwrong.db")
+    cursor = connection.cursor()
+    vote_check = cursor.execute("SELECT COUNT(*) FROM votes WHERE user_id = ? AND poll_id = ?", (session["user_id"], poll["id"])).fetchone()[0]
+    cursor.close()
+    connection.close()
+
+    # if the user has voted, display the poll results, else render poll taking page
+    if vote_check > 0:
+        return render_template('poll_results.html', poll=poll)
+    else:
+        print(poll)
+        return render_template('poll.html', poll=poll)
 
 
 @app.route("/signout", methods=["GET", "POST"])
@@ -212,52 +461,6 @@ def signout():
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    countries = [
-        "", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
-        "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
-        "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
-        "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso",
-        "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic",
-        "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Cote d'Ivoire",
-        "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica",
-        "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
-        "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia",
-        "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
-        "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
-        "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati",
-        "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon",
-        "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi",
-        "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico",
-        "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
-        "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria",
-        "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea",
-        "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda",
-        "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
-        "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore",
-        "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka",
-        "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand",
-        "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
-        "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
-        "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-        ]
-
-    gender_options = ["","Male", "Female", "Non-binary", "Other"]
-
-    languages =  [
-                    "", "Afrikaans", "Amharic", "Arabic", "Azerbaijani", "Bengali", "Burmese", 
-                    "Chinese", "Czech", "Danish", "Dutch", "English", "Finnish", "French", 
-                    "German", "Greek", "Hebrew", "Hindi", "Hungarian", "Indonesian", "Italian", 
-                    "Japanese", "Kannada", "Korean", "Malay", "Malayalam", "Marathi", "Navajo", 
-                    "Nepali", "Norwegian", "Persian", "Polish", "Portuguese", "Punjabi", 
-                    "Romanian", "Russian", "Serbian", "Slovak", "Slovenian", "Spanish", 
-                    "Swahili", "Swedish", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", 
-                    "Urdu", "Vietnamese", "Xhosa", "Yoruba", "Zulu", "Other"
-                ]
-
-    politics_options = ["","Center", "Left", "Right", "Other"]
-
-    sexualities = ["","Heterosexual", "Homosexual", "Bisexual", "Pansexual", "Asexual", "Other"]
-
     if request.method == "POST":
         # check valid inputs
 
@@ -372,4 +575,6 @@ def profile():
         return render_template("profile.html", age=age, country=country, countries=countries, gender=gender, gender_options=gender_options, sexuality=sexuality, sexualities=sexualities, politics=politics, politics_options=politics_options, language=language, languages=languages)
 
 
-#@login_required
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404

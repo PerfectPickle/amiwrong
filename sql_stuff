@@ -25,13 +25,10 @@ CREATE TABLE profiles (
 CREATE TABLE polls (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     user_id INTEGER NOT NULL,
-    statement TEXT NOT NULL,
+    unique_id TEXT NOT NULL UNIQUE,
     question TEXT NOT NULL,
-    creation_date DATETIME NOT NULL,
-    hide_statement INTEGER NOT NULL,
-    null_hyp TEXT NOT NULL,
-    alt_hyp TEXT NOT NULL,
-    significance_level REAL NOT NULL
+    assumption TEXT,
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -41,5 +38,35 @@ CREATE TABLE answers (
     answer TEXT NOT NULL,
 
     FOREIGN KEY (poll_id) REFERENCES polls(id)
+);
+
+CREATE TABLE votes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    user_id INTEGER NOT NULL,
+    poll_id INTEGER NOT NULL,
+    chosen_answer_id INTEGER NOT NULL,
+    vote_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (poll_id) REFERENCES polls(id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (chosen_answer_id) REFERENCES answers(id)
+);
+
+CREATE TABLE demographics_options (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    poll_id INTEGER NOT NULL,
+    demographic TEXT NOT NULL,
+
+    FOREIGN KEY (poll_id) REFERENCES polls(id)
+);
+
+CREATE TABLE demographics_responses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    vote_id INTEGER NOT NULL,
+    demographic_option_id INTEGER NOT NULL,
+    demographic_response TEXT,
+
+    FOREIGN KEY (vote_id) REFERENCES votes(id)
+    FOREIGN KEY (demographic_option_id) REFERENCES demographics_options(id)
 );
 

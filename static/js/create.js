@@ -67,7 +67,7 @@ $(document).ready(function () {
 
   // Update hasPollQuestion whenever an input in pollQuestion changes
   $("#pollQuestion").on("input", function () {
-    if ($(this).val().length > 5) {
+    if ($(this).val().length > 3) {
       hasPollQuestion = true;
     } else {
       hasPollQuestion = false;
