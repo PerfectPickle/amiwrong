@@ -418,32 +418,128 @@ def create():
         return render_template("create.html", demographics=demographics, max_choices=max_choices, max_custom_demo_options=max_custom_demo_options)
 
 
-@app.route("/poll/<unique_id>")
+@app.route("/poll/<unique_id>", methods=["GET", "POST"])
 def view_poll(unique_id):
     poll = get_poll(unique_id)
+    print(unique_id)
     if not poll:
-        abort(404)  # return a 404 not found response if the poll doesn't exist (triggers decorator)
-    poll = get_poll(unique_id)
-    if not poll:
-        abort(404)  # return a 404 not found response if the poll doesn't exist
-    
-    # if user is not logged in, show poll results
-    if 'user_id' not in session:
-        return render_template('poll_results.html', poll=poll)
+        abort(404)  # Poll doesn't exist
 
-    # if user is logged in, check if they have voted on this poll
+    if request.method == "POST":
+        # Check valid answer
+        poll_answer = request.form.get("pollChoice")
+        if poll_answer not in poll["choices"]:
+            flash("Invalid answer")
+            return redirect(f'/poll/{unique_id}')
+
+        poll_answer_id = get_answer_id(poll_answer, poll["id"])
+
+        # Check valid demographic input
+        demo_answers = {}
+        for d in poll["demographics"].keys():
+            demo_answers[d] = request.form.get(d)
+            # check that preset demographic category and answer is valid
+            match str(d).lower():
+                case "age":
+                    if age <= 0 or age >= 130:
+                        pass
+                case "country":
+                    if demo_answers[d] not in countries:
+                        flash("Invalid demographic data submitted")
+                        return redirect(f'/poll/{unique_id}')
+                case "gender":
+                    if demo_answers[d] not in gender_options:
+                        flash("Invalid demographic data submitted")
+                        return redirect(f'/poll/{unique_id}')
+                case "sexuality":
+                    if demo_answers[d] not in sexualities:
+                        flash("Invalid demographic data submitted")
+                        return redirect(f'/poll/{unique_id}')
+                case "politics":
+                    if demo_answers[d] not in politics_options:
+                        flash("Invalid demographic data submitted")
+                        return redirect(f'/poll/{unique_id}')
+                case "language":
+                    if demo_answers[d] not in languages:
+                        flash("Invalid demographic data submitted")
+                        return redirect(f'/poll/{unique_id}')
+                case _:
+                    flash("Invalid demographic category submitted")
+                    return redirect(f'/poll/{unique_id}')
+            if demo_answers[d] == "":
+                demo_answers.pop(d, None)  # remove nonresponse
+
+        for d in poll["custom_demographics"]:
+            demo_answer = request.form.get(d)
+            if demo_answer:
+                demo_answers[d] = demo_answer
+            else:
+                demo_answers.pop(d, None)  # remove nonresponse
+
+        # save vote to db
+        connection = sqlite3.connect("amiwrong.db")
+        cursor = connection.cursor()
+        try:
+            cursor.execute("INSERT INTO votes (user_id, poll_id, chosen_answer_id) VALUES (?, ?, ?)",
+                           (session["user_id"], poll["id"], poll_answer_id))
+            vote_id = cursor.lastrowid
+
+            # Insert demographic responses
+            for demographic, response in demo_answers.items():
+                demographic_option_id = get_demographic_option_id(demographic, poll["id"])
+                if demographic_option_id is not None:
+                    cursor.execute("INSERT INTO demographics_responses (vote_id, demographic_option_id, demographic_response) VALUES (?, ?, ?)",
+                                   (vote_id, demographic_option_id, response))
+
+            connection.commit()
+        except sqlite3.Error as e:
+            connection.rollback()
+            flash("An error occurred while saving your vote.")
+            return redirect(f'/poll/{unique_id}')
+        finally:
+            cursor.close()
+            connection.close()
+
+        return redirect(f'/poll_results/{unique_id}')
+    else:
+        # if user is not logged in, show poll results
+        if 'user_id' not in session:
+            return render_template('poll_results.html', poll=poll)
+
+        # if user is logged in, check if they have voted on this poll
+        connection = sqlite3.connect("amiwrong.db")
+        cursor = connection.cursor()
+        vote_check = cursor.execute("SELECT COUNT(*) FROM votes WHERE user_id = ? AND poll_id = ?", (session["user_id"], poll["id"])).fetchone()[0]
+        cursor.close()
+        connection.close()
+
+        # if the user has voted, display the poll results, else render poll taking page
+        if vote_check > 0:
+            return render_template('poll_results.html', poll=poll)
+        else:
+            print(poll)
+            return render_template('poll.html', poll=poll)
+
+# helper function to get demographic_option_id
+def get_demographic_option_id(demographic, poll_id):
     connection = sqlite3.connect("amiwrong.db")
     cursor = connection.cursor()
-    vote_check = cursor.execute("SELECT COUNT(*) FROM votes WHERE user_id = ? AND poll_id = ?", (session["user_id"], poll["id"])).fetchone()[0]
+    cursor.execute("SELECT id FROM demographics_options WHERE demographic = ? AND poll_id = ?", (demographic, poll_id))
+    result = cursor.fetchone()
     cursor.close()
     connection.close()
+    return result[0] if result else None
 
-    # if the user has voted, display the poll results, else render poll taking page
-    if vote_check > 0:
-        return render_template('poll_results.html', poll=poll)
-    else:
-        print(poll)
-        return render_template('poll.html', poll=poll)
+# helper function to get answer_id of an option for a poll
+def get_answer_id(answer, poll_id):
+    connection = sqlite3.connect("amiwrong.db")
+    cursor = connection.cursor()
+    cursor.execute("SELECT id FROM answers WHERE answer = ? AND poll_id = ?", (answer, poll_id))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return result[0] if result else None
+
 
 
 @app.route("/signout", methods=["GET", "POST"])
