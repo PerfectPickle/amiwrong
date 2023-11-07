@@ -1,0 +1,20 @@
+{% extends "layout.html" %} {% block title %} {{ poll["question"] }} {% endblock
+%} {% block main %}
+
+<h1>{{ poll["question"] }}</h1>
+
+<p>Results</p>
+<div class="mb-3">
+  {% for answer in poll["answers"] %}
+  <div>{{ answer }}</div>
+  {% endfor %}
+</div>
+
+<!-- to display flash messages -->
+{% with messages = get_flashed_messages() %} {% if messages %}
+<ul class="flashes">
+  {% for message in messages %}
+  <li>{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %} {% endwith %} {% endblock %}

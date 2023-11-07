@@ -11,6 +11,7 @@ from functools import wraps
 
 import random
 import string
+from datetime import datetime, timedelta
 
 ### Global variables
 
@@ -131,6 +132,22 @@ def get_poll(unique_id):
     
     return poll
 
+# get user profile demographic answers from db as dict, if not found, returns False
+def get_profile(user_id):
+    connection = sqlite3.connect("amiwrong.db")
+    # use row factory to fetch rows as dictionaries
+    connection.row_factory = dict_factory
+    cursor = connection.cursor()
+
+    try:
+        profile = cursor.execute("SELECT * FROM profiles WHERE user_id=?;", (user_id,)).fetchone()
+    except:
+        profile = False
+    
+    cursor.close()
+    connection.close()
+
+    return profile
 
 
 # Configure application
@@ -324,7 +341,17 @@ def create():
         # Cursor with which to interact with database
         cursor = connection.cursor()
 
-        user_polls_made_in_last_day = cursor.execute("SELECT COUNT(*) FROM polls WHERE user_id = ?", (session["user_id"],)).fetchone()[0]
+        # calculate the datetime 24 hours ago from now
+        twenty_four_hours_ago = datetime.now() - timedelta(days=1)
+        # format it so it's compat with sqlite
+        formatted_time = twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')
+
+        user_polls_made_in_last_day = cursor.execute("""
+            SELECT COUNT(*)
+            FROM polls
+            WHERE user_id = ?
+            AND creation_date > ?
+        """, (session["user_id"], formatted_time)).fetchone()[0]
 
         if user_polls_made_in_last_day >= max_polls_per_day:
             flash('24 hour poll creation limit ({}) reached.'.format(max_polls_per_day))
@@ -347,15 +374,16 @@ def create():
                 poll_choices.append(choice)
             i += 1
 
-        custom_demos = []
+        
+        demographic_options = request.form.getlist('demographicOptions')
+
         i = 1
         while f"customDemo{i}" in request.form:
             demo = request.form.get(f"customDemo{i}")
             if demo:  # to prevent empty custom demographics from being added
-                custom_demos.append(demo)
+                demographic_options.append(demo)
             i += 1
 
-        demographic_options = request.form.getlist('demographicOptions')
 
         # check question length
         if len(question) <= 3:
@@ -441,8 +469,9 @@ def view_poll(unique_id):
             # check that preset demographic category and answer is valid
             match str(d).lower():
                 case "age":
-                    if age <= 0 or age >= 130:
-                        pass
+                    if int(demo_answers[d]) <= 0 or int(demo_answers[d]) >= 130:
+                        flash("Invalid age entered")
+                        return redirect(f'/poll/{unique_id}')
                 case "country":
                     if demo_answers[d] not in countries:
                         flash("Invalid demographic data submitted")
@@ -500,7 +529,7 @@ def view_poll(unique_id):
             cursor.close()
             connection.close()
 
-        return redirect(f'/poll_results/{unique_id}')
+        return redirect(f'/poll/{unique_id}')
     else:
         # if user is not logged in, show poll results
         if 'user_id' not in session:
@@ -513,12 +542,15 @@ def view_poll(unique_id):
         cursor.close()
         connection.close()
 
+        # get user profile
+        profile = get_profile(session["user_id"])
+
         # if the user has voted, display the poll results, else render poll taking page
         if vote_check > 0:
             return render_template('poll_results.html', poll=poll)
         else:
             print(poll)
-            return render_template('poll.html', poll=poll)
+            return render_template('poll.html', poll=poll, profile=profile)
 
 # helper function to get demographic_option_id
 def get_demographic_option_id(demographic, poll_id):

@@ -1,0 +1,65 @@
+{% extends "layout.html" %} {% block title %} {{ poll["question"] }} {% endblock
+%} {% block main %}
+
+<h1>{{ poll["question"] }}</h1>
+<br />
+
+<form action="/poll/{{ poll['unique_id'] }}" method="post">
+  <!-- show poll choices -->
+  <div class="form-group">
+    <select class="form-control" id="pollChoice" name="pollChoice">
+      <option value="" selected disabled>Select your answer</option>
+      {% for choice in poll["choices"] %}
+      <option value="{{ choice }}">{{ choice }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <br />
+  <br />
+  <h2>Demographics questions</h2>
+
+<!-- show preset demographic dropdowns -->
+{% for demo, options in poll["demographics"].items() %}
+  <div class="form-group">
+    {% set demo_key = demo.lower() %}
+    <label for="{{ demo }}">{{ demo }}</label>
+    {% if demo == "Age" %}
+      <input type="text" class="form-control" id="{{ demo }}" name="{{ demo }}" value="{{ profile[demo_key] if profile[demo_key] != 'NULL' else '' }}" />
+    {% else %}
+      <select class="form-control" id="{{ demo }}" name="{{ demo }}">
+        {% for option in options %}
+          <option value="{{ option }}" {% if profile[demo_key]|string == option|string %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </div>
+{% endfor %}
+
+
+  <!-- show custom demographic input fields -->
+  {% if "custom_demographics" in poll %} {% for demo in
+  poll["custom_demographics"] %}
+  <div class="form-group">
+    <label for="{{ demo }}">{{ demo }}</label>
+    <input
+      type="text"
+      class="form-control"
+      id="{{ demo }}"
+      name="{{ demo }}"
+      placeholder="Fill in your {{ demo }}"
+    />
+  </div>
+  {% endfor %} {% endif %}
+
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<!-- to display flash messages -->
+{% with messages = get_flashed_messages() %} {% if messages %}
+<ul class="flashes">
+  {% for message in messages %}
+  <li>{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %} {% endwith %} {% endblock %}
