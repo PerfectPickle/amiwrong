@@ -4,7 +4,7 @@ import bcrypt
 import random
 import string
 
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 
 from functools import wraps
@@ -83,7 +83,6 @@ def get_poll(unique_id):
     my_poll_dict = {}
     list_of_answer_dicts = cursor.execute("SELECT * FROM answers WHERE poll_id=?;", (poll["id"],)).fetchall()
     choices = []
-    print(list_of_answer_dicts)
     for a in list_of_answer_dicts:
         choices.append(a["answer"])
     poll["choices"] = choices
@@ -116,17 +115,6 @@ def get_poll(unique_id):
     poll["demographics"] = preset_demo_questions
     poll["custom_demographics"] = custom_demographics
 
-
-    # get vote count per answer
-    # for answer in answers:
-    #     vote_count = cursor.execute("SELECT COUNT(*) FROM votes WHERE poll_id=? AND chosen_answer_id=?;", (poll["id"], answer["id"])).fetchone()
-    #     print(answer, vote_count)
-        # answers = []
-        # print(list_of_answer_dicts)
-        # for a in list_of_answer_dicts:
-        #     answers.append(a["answer"])
-        # poll["answers"] = answers
-
     cursor.close()
     connection.close()
     
@@ -148,6 +136,115 @@ def get_profile(user_id):
     connection.close()
 
     return profile
+
+
+# get vote counts, optionally limited to a list of demographics
+def get_vote_count(unique_id, demographics=None):
+    # validate input
+    if not unique_id or (demographics is not None and not isinstance(demographics, dict)):
+        raise ValueError("Invalid unique_id or demographics argument")
+
+    try:
+        connection = sqlite3.connect("amiwrong.db")
+        cursor = connection.cursor()
+
+        # retrieve poll_id using unique_id
+        poll_id = cursor.execute("SELECT id FROM polls WHERE unique_id=?;", (unique_id,)).fetchone()
+        if poll_id is None:
+            raise ValueError(f"No poll found with unique_id {unique_id}")
+        poll_id = poll_id[0]
+
+        votes = {}
+
+        # get list of answer options for the poll
+        answers = cursor.execute("SELECT id, answer FROM answers WHERE poll_id=?;", (poll_id,)).fetchall()
+        for answer_id, answer_text in answers:
+            if demographics:
+                params = [poll_id, answer_id]
+                demographic_subqueries = []
+
+                for demo, value in demographics.items():
+                    print(demo, value)
+
+                    # do a separate query for when no value is given, i.e. nonresponse
+                    if value == "":
+                        demographic_subquery = """
+                        NOT EXISTS (
+                        SELECT 1
+                        FROM demographics_responses dr
+                        INNER JOIN votes v ON dr.vote_id = v.id
+                        INNER JOIN demographics_options do ON dr.demographic_option_id = do.id
+                        WHERE v.poll_id = ?
+                        AND v.chosen_answer_id = ?
+                        AND do.poll_id = v.poll_id
+                        AND do.demographic = ?
+                    )
+                    """
+                        demographic_subqueries.append(demographic_subquery)
+                        params.extend([poll_id, answer_id, demo])
+                    elif demo.lower() == "age":
+                        age_range_start = int(value[:-1])
+                        print(age_range_start)
+                        age_range_end = age_range_start + 10
+                        demographic_subquery = """
+                        EXISTS (
+                            SELECT 1
+                            FROM votes v
+                            INNER JOIN demographics_responses dr ON v.id = dr.vote_id
+                            INNER JOIN demographics_options do ON dr.demographic_option_id = do.id
+                            WHERE v.poll_id = ? 
+                            AND v.chosen_answer_id = ?
+                            AND do.poll_id = v.poll_id
+                            AND do.demographic LIKE ?
+                            AND CAST(dr.demographic_response AS INTEGER) >= ? 
+                            AND CAST(dr.demographic_response AS INTEGER) < ?
+                        )
+                        """
+                        demographic_subqueries.append(demographic_subquery)
+                        params.extend([poll_id, answer_id, demo, age_range_start, age_range_end])
+                    else:
+                        demographic_subquery = """
+                        EXISTS (
+                            SELECT 1
+                            FROM votes v
+                            INNER JOIN demographics_responses dr ON v.id = dr.vote_id
+                            INNER JOIN demographics_options do ON dr.demographic_option_id = do.id
+                            WHERE v.poll_id = ? 
+                            AND v.chosen_answer_id = ?
+                            AND do.poll_id = v.poll_id
+                            AND do.demographic = ?
+                            AND dr.demographic_response = ?
+                        )
+                        """
+                        demographic_subqueries.append(demographic_subquery)
+                        params.extend([poll_id, answer_id, demo, value])
+
+                demographic_filter = " AND ".join(demographic_subqueries)
+                vote_count_query = f"""
+                    SELECT COUNT(*)
+                    FROM votes v
+                    WHERE v.poll_id = ? AND v.chosen_answer_id = ? AND {demographic_filter};
+                """
+            else:
+                vote_count_query = "SELECT COUNT(*) FROM votes WHERE poll_id=? AND chosen_answer_id=?;"
+                params = (poll_id, answer_id)
+
+            print(vote_count_query)
+            print(params)
+            vote_count = cursor.execute(vote_count_query, params).fetchone()[0]
+            votes[answer_text] = vote_count
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e.args[0]}")
+        votes = {}
+    finally:
+        # Ensure the cursor and the database connection are closed
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+    return votes
 
 
 # Configure application
@@ -451,10 +548,10 @@ def view_poll(unique_id):
     poll = get_poll(unique_id)
     print(unique_id)
     if not poll:
-        abort(404)  # Poll doesn't exist
+        abort(404) 
 
     if request.method == "POST":
-        # Check valid answer
+        # check valid answer
         poll_answer = request.form.get("pollChoice")
         if poll_answer not in poll["choices"]:
             flash("Invalid answer")
@@ -462,7 +559,7 @@ def view_poll(unique_id):
 
         poll_answer_id = get_answer_id(poll_answer, poll["id"])
 
-        # Check valid demographic input
+        # check valid demographic input
         demo_answers = {}
         for d in poll["demographics"].keys():
             demo_answers[d] = request.form.get(d)
@@ -531,14 +628,25 @@ def view_poll(unique_id):
 
         return redirect(f'/poll/{unique_id}')
     else:
+        votes = get_vote_count(unique_id)
         # if user is not logged in, show poll results
         if 'user_id' not in session:
-            return render_template('poll_results.html', poll=poll)
+            return render_template('poll_results.html', poll=poll, votes=votes)
 
-        # if user is logged in, check if they have voted on this poll
+        # if user is logged in, check if they have voted on this poll and get their choice
         connection = sqlite3.connect("amiwrong.db")
         cursor = connection.cursor()
         vote_check = cursor.execute("SELECT COUNT(*) FROM votes WHERE user_id = ? AND poll_id = ?", (session["user_id"], poll["id"])).fetchone()[0]
+        if vote_check > 0:
+            user_choice = cursor.execute(""" 
+                SELECT answers.answer 
+                FROM votes 
+                JOIN answers ON votes.chosen_answer_id = answers.id 
+                JOIN polls ON votes.poll_id = polls.id 
+                WHERE votes.user_id = ? AND polls.unique_id = ?;
+                """, (session["user_id"], unique_id)).fetchone()[0]
+        else:
+            user_choice = None
         cursor.close()
         connection.close()
 
@@ -547,7 +655,7 @@ def view_poll(unique_id):
 
         # if the user has voted, display the poll results, else render poll taking page
         if vote_check > 0:
-            return render_template('poll_results.html', poll=poll)
+            return render_template('poll_results.html', poll=poll, votes=votes, user_choice=user_choice)
         else:
             print(poll)
             return render_template('poll.html', poll=poll, profile=profile)
@@ -556,7 +664,7 @@ def view_poll(unique_id):
 def get_demographic_option_id(demographic, poll_id):
     connection = sqlite3.connect("amiwrong.db")
     cursor = connection.cursor()
-    cursor.execute("SELECT id FROM demographics_options WHERE demographic = ? AND poll_id = ?", (demographic, poll_id))
+    cursor.execute("SELECT id FROM demographics_options WHERE demographic = ? AND poll_id = ?", (demographic, poll_id,))
     result = cursor.fetchone()
     cursor.close()
     connection.close()
@@ -572,6 +680,22 @@ def get_answer_id(answer, poll_id):
     connection.close()
     return result[0] if result else None
 
+
+@app.route('/get_filtered_votes')
+def get_filtered_votes():
+    poll_id = request.args.get('poll_id')
+    demographics = request.args.get('demographics')  # this would be a string in the format of 'gender:male,age:30-40'
+    
+    # convert demographics string to dictionary
+    demographic_filters = {}
+    if demographics:
+        for demographic in demographics.split(','):
+            key, value = demographic.split(':')
+            demographic_filters[key] = value
+    
+    votes = get_vote_count(poll_id, demographic_filters)
+    
+    return jsonify(votes)
 
 
 @app.route("/signout", methods=["GET", "POST"])

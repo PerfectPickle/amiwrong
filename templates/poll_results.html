@@ -1,16 +1,191 @@
 {% extends "layout.html" %} {% block title %} {{ poll["question"] }} {% endblock
 %} {% block main %}
 
-<h1>{{ poll["question"] }}</h1>
+<h1>{{ poll["question"] }} | Results</h1>
+<button class="btn btn-primary" id="shareButton">Share Poll</button>
+<br /><br />
 
-<p>Results</p>
-<div class="mb-3">
-  {% for answer in poll["answers"] %}
-  <div>{{ answer }}</div>
+<!-- demographic filters -->
+<h5>Filter votes by demographic responses</h5>
+
+<form id="demographicFilters">
+  {% for demo, options in poll["demographics"].items() %}
+  <div>
+    {% if demo.lower() == "age" %}
+    <label for="filter-{{ demo }}">Age:</label>
+    <select
+      name="demographics"
+      id="filter-age"
+      onchange="updateChartWithDemographics()"
+    >
+      <option value="">Select Age</option>
+      <option value="age:10s">10s</option>
+      <option value="age:20s">20s</option>
+      <option value="age:30s">30s</option>
+      <option value="age:40s">40s</option>
+      <option value="age:50s">50s</option>
+      <option value="age:60s">60s</option>
+      <option value="age:70s">70s</option>
+      <option value="age:80s">80s</option>
+      <option value="age:90s">90s</option>
+      <option value="age:100s">100s</option>
+    </select>
+    {% else %}
+    <label for="filter-{{ demo }}">{{ demo.capitalize() }}:</label>
+    <select
+      name="demographics"
+      id="filter-{{ demo }}"
+      onchange="updateChartWithDemographics()"
+    >
+      <option value="">Select {{ demo }}</option>
+      {% for option in options %}
+      <option value="{{ demo }}:{{ option }}">{{ option }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+  </div>
   {% endfor %}
+</form>
+
+<!-- canvas for chart.js bar graph -->
+<div
+  class="chart-container"
+  style="position: relative; height: 40vh; width: 80vw"
+>
+  <canvas id="voteResultsChart"></canvas>
 </div>
 
-<!-- to display flash messages -->
+<!-- canvas for chart.js pie chart -->
+<div
+  class="chart-container"
+  style="position: relative; height: 40vh; width: 80vw"
+>
+  <canvas id="voteResultsPieChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+      const userChoice = {{ user_choice | default('null') | tojson }};
+    const pollVotes = {{ votes | default({}) | tojson }};
+    let totalVotes = Object.values(pollVotes).reduce((a, b) => a + b, 0);
+    let sortedLabels = Object.keys(pollVotes).sort((a, b) => pollVotes[b] - pollVotes[a]);
+    let sortedDataPoints = sortedLabels.map(label => pollVotes[label]);
+    const userChoiceLabel = 'Your Choice';
+
+    function generateColorArray(labels) {
+      const colors = [
+        '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
+        '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
+        '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
+        '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
+        '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC',
+        '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
+      ];
+      return labels.map((label, index) => colors[index % colors.length]);
+    }
+
+    const initialDistinctColors = generateColorArray(sortedLabels);
+
+
+    const barData = {
+    labels: sortedLabels,
+    datasets: [{
+      label: 'Number of Votes',
+      data: sortedDataPoints,
+      backgroundColor: initialDistinctColors,
+      borderColor: initialDistinctColors.map((color, index) => {
+        return sortedLabels[index] === userChoice ? '#ffffff' : color; // white border for user choice
+      }),
+      borderWidth: sortedLabels.map(label => label === userChoice ? 3 : 1),
+    }]
+  };
+
+  const pieData = {
+    labels: sortedLabels,
+    datasets: [{
+      label: 'Vote Percentage',
+      data: sortedDataPoints.map(vote => (vote / totalVotes * 100).toFixed(2)),
+      backgroundColor: initialDistinctColors,
+      borderColor: initialDistinctColors.map((color, index) => {
+        return sortedLabels[index] === userChoice ? '#ffffff' : color; // white border for user choice
+      }),
+      borderWidth: sortedLabels.map(label => label === userChoice ? 3 : 1),
+    }]
+  };
+
+      const options = {
+        indexAxis: 'y',
+        scales: {
+          x: {
+            ticks: { stepSize: 1 },
+            scaleLabel: { display: true, labelString: 'Number of votes' }
+          }
+        },
+        plugins: {
+          legend: { position: 'right', onClick: () => {} },
+          title: { display: true, text: 'Poll Results' }
+        }
+      };
+
+      const barChart = new Chart(document.getElementById('voteResultsChart'), { type: 'bar', data: barData, options: options });
+      const pieChart = new Chart(document.getElementById('voteResultsPieChart'), { type: 'pie', data: pieData, options: { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Vote Percentage' } } } });
+
+      function updateChartData(newData) {
+        let newTotalVotes = Object.values(newData).reduce((a, b) => a + b, 0);
+        let sortedLabels = Object.keys(newData).sort((a, b) => newData[b] - newData[a]);
+        let sortedDataPoints = sortedLabels.map(label => newData[label]);
+        const distinctColors = generateColorArray(sortedLabels);
+
+        barChart.data.labels = sortedLabels;
+        barChart.data.datasets.forEach((dataset) => {
+          dataset.data = sortedDataPoints;
+          dataset.backgroundColor = distinctColors;
+          dataset.borderColor = distinctColors;
+        });
+        barChart.update();
+
+        pieChart.data.labels = sortedLabels;
+        pieChart.data.datasets.forEach((dataset) => {
+          dataset.data = sortedDataPoints.map(vote => (vote / newTotalVotes * 100).toFixed(2));
+          dataset.backgroundColor = distinctColors;
+          dataset.borderColor = distinctColors;
+        });
+        pieChart.update();
+      }
+
+      function updateChartWithDemographics() {
+        const selectedDemographics = [];
+        document.querySelectorAll('#demographicFilters select').forEach((select) => {
+            if (select.value) {
+                const [category, value] = select.value.split(':');
+                selectedDemographics.push(select.value);
+                console.log(select.value);
+            }
+        });
+
+        const pollId = "{{ poll['unique_id'] }}";
+        fetch(`/get_filtered_votes?poll_id=${pollId}&demographics=${selectedDemographics.join(',')}`)
+            .then(response => response.json())
+            .then(data => {
+                updateChartData(data);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
+      // share button functionality
+      document.getElementById('shareButton').addEventListener('click', function() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Poll URL copied to clipboard!');
+        }).catch(err => {
+            console.error('Error copying URL to clipboard:', err);
+        });
+    });
+</script>
+
+<!-- Display flash messages -->
 {% with messages = get_flashed_messages() %} {% if messages %}
 <ul class="flashes">
   {% for message in messages %}
