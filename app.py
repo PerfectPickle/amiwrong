@@ -163,67 +163,55 @@ def get_vote_count(unique_id, demographics=None):
                 params = [poll_id, answer_id]
                 demographic_subqueries = []
 
-                for demo, value in demographics.items():
+                for i, (demo, value) in enumerate(demographics.items(), start=1):
                     print(demo, value)
 
-                    # do a separate query for when no value is given, i.e. nonresponse
+                    # do a separate query for when no value is given, i.e., nonresponse
                     if value == "":
-                        demographic_subquery = """
-                        NOT EXISTS (
-                        SELECT 1
-                        FROM demographics_responses dr
-                        INNER JOIN votes v ON dr.vote_id = v.id
-                        INNER JOIN demographics_options do ON dr.demographic_option_id = do.id
-                        WHERE v.poll_id = ?
-                        AND v.chosen_answer_id = ?
-                        AND do.poll_id = v.poll_id
-                        AND do.demographic = ?
-                    )
-                    """
+                        demographic_subquery = f"""
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM demographics_responses dr{i}
+                            INNER JOIN votes v ON dr{i}.vote_id = v.id
+                            INNER JOIN demographics_options do{i} ON dr{i}.demographic_option_id = do{i}.id
+                            WHERE v.poll_id = ?
+                            AND v.chosen_answer_id = ?
+                            AND do{i}.poll_id = v.poll_id
+                            AND do{i}.demographic = ?
+                        )
+                        """
                         demographic_subqueries.append(demographic_subquery)
                         params.extend([poll_id, answer_id, demo])
                     elif demo.lower() == "age":
                         age_range_start = int(value[:-1])
                         print(age_range_start)
                         age_range_end = age_range_start + 10
-                        demographic_subquery = """
-                        EXISTS (
-                            SELECT 1
-                            FROM votes v
-                            INNER JOIN demographics_responses dr ON v.id = dr.vote_id
-                            INNER JOIN demographics_options do ON dr.demographic_option_id = do.id
-                            WHERE v.poll_id = ? 
-                            AND v.chosen_answer_id = ?
-                            AND do.poll_id = v.poll_id
-                            AND do.demographic LIKE ?
-                            AND CAST(dr.demographic_response AS INTEGER) >= ? 
-                            AND CAST(dr.demographic_response AS INTEGER) < ?
-                        )
+                        demographic_subquery = f"""
+                            AND do{i}.poll_id = v.poll_id
+                            AND do{i}.demographic LIKE ?
+                            AND CAST(dr{i}.demographic_response AS INTEGER) >= ? 
+                            AND CAST(dr{i}.demographic_response AS INTEGER) < ?
                         """
                         demographic_subqueries.append(demographic_subquery)
-                        params.extend([poll_id, answer_id, demo, age_range_start, age_range_end])
+                        params.extend([demo, age_range_start, age_range_end])
                     else:
-                        demographic_subquery = """
-                        EXISTS (
-                            SELECT 1
-                            FROM votes v
-                            INNER JOIN demographics_responses dr ON v.id = dr.vote_id
-                            INNER JOIN demographics_options do ON dr.demographic_option_id = do.id
-                            WHERE v.poll_id = ? 
-                            AND v.chosen_answer_id = ?
-                            AND do.poll_id = v.poll_id
-                            AND do.demographic = ?
-                            AND dr.demographic_response = ?
-                        )
+                        demographic_subquery = f"""
+                            AND do{i}.poll_id = v.poll_id
+                            AND do{i}.demographic = ?
+                            AND dr{i}.demographic_response = ?
                         """
                         demographic_subqueries.append(demographic_subquery)
-                        params.extend([poll_id, answer_id, demo, value])
+                        params.extend([demo, value])
 
-                demographic_filter = " AND ".join(demographic_subqueries)
+                demographic_filter = " ".join(demographic_subqueries)
                 vote_count_query = f"""
-                    SELECT COUNT(*)
+                    SELECT COUNT(DISTINCT v.id) AS unique_votes_count
                     FROM votes v
-                    WHERE v.poll_id = ? AND v.chosen_answer_id = ? AND {demographic_filter};
+                    {' '.join([f'JOIN demographics_responses dr{i} ON v.id = dr{i}.vote_id' for i in range(1, len(demographics)+1)])}
+                    {' '.join([f'JOIN demographics_options do{i} ON dr{i}.demographic_option_id = do{i}.id' for i in range(1, len(demographics)+1)])}
+                    WHERE v.poll_id = ? 
+                    AND v.chosen_answer_id = ? 
+                    {demographic_filter};
                 """
             else:
                 vote_count_query = "SELECT COUNT(*) FROM votes WHERE poll_id=? AND chosen_answer_id=?;"
@@ -232,6 +220,7 @@ def get_vote_count(unique_id, demographics=None):
             print(vote_count_query)
             print(params)
             vote_count = cursor.execute(vote_count_query, params).fetchone()[0]
+            print(f'vote count: {vote_count}')
             votes[answer_text] = vote_count
 
     except sqlite3.Error as e:
@@ -245,7 +234,6 @@ def get_vote_count(unique_id, demographics=None):
             connection.close()
 
     return votes
-
 
 # Configure application
 app = Flask(__name__)
@@ -306,7 +294,14 @@ def index():
     if session.get("user_id") is None:
         return render_template("index.html")
     else:
-        return render_template("polls.html")
+        connection = sqlite3.connect("amiwrong.db")
+        # Use Row factory to fetch rows as dictionaries
+        connection.row_factory = dict_factory
+
+        cursor = connection.cursor()
+        polls = cursor.execute("SELECT * FROM polls WHERE user_id=?;", (session.get("user_id"),)).fetchall()
+    
+        return render_template("polls.html", polls=polls)
 
 @app.route("/login", methods=["GET", "POST"])
 @logged_out_required

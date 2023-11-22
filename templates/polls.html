@@ -1,13 +1,16 @@
-{% extends "layout.html" %}
-
-{% block title %}
-Login
-{% endblock %}
-
-{% block main %}
+{% extends "layout.html" %} {% block title %} Login {% endblock %} {% block main
+%}
 
 <h1>My Polls</h1>
-<div></div>
+<div>
+  {% for poll in polls %}
+  <div>
+    <a href="/poll/{{ poll['unique_id'] }}">{{ poll["question"] }}</a>
+  </div>
+  {% endfor %}
+</div>
+
+<br />
 <button class="btn btn-primary small-btn">Make a poll</button>
 
 {% endblock %}
