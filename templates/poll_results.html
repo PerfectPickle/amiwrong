@@ -66,123 +66,140 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-      const userChoice = {{ user_choice | default('null') | tojson }};
-    const pollVotes = {{ votes | default({}) | tojson }};
-    let totalVotes = Object.values(pollVotes).reduce((a, b) => a + b, 0);
-    let sortedLabels = Object.keys(pollVotes).sort((a, b) => pollVotes[b] - pollVotes[a]);
-    let sortedDataPoints = sortedLabels.map(label => pollVotes[label]);
-    const userChoiceLabel = 'Your Choice';
+  const userChoice = {{ user_choice | default('null') | tojson }};
+  const pollVotes = {{ votes | default({}) | tojson }};
+  let totalVotes = Object.values(pollVotes).reduce((a, b) => a + b, 0);
+  let sortedLabels = Object.keys(pollVotes).sort((a, b) => pollVotes[b] - pollVotes[a]);
+  let sortedDataPoints = sortedLabels.map(label => pollVotes[label]);
+  const userChoiceLabel = 'Your Choice';
 
-    function generateColorArray(labels) {
+  function generateColorArray(labels) {
       const colors = [
-        '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
-        '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
-        '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
-        '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
-        '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC',
-        '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
+          '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
+          '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
+          '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
+          '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
+          '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC',
+          '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
       ];
       return labels.map((label, index) => colors[index % colors.length]);
-    }
+  }
 
-    const initialDistinctColors = generateColorArray(sortedLabels);
+  const initialDistinctColors = generateColorArray(sortedLabels);
 
+  // Define a dictionary to hold border width and color for each label
+  const labelStyles = {};
+  sortedLabels.forEach(label => {
+      labelStyles[label] = {
+          borderWidth: label === userChoice ? 3 : 1,
+          borderColor: initialDistinctColors.map((color, index) => {
+              return sortedLabels[index] === userChoice ? '#ffffff' : color; // white border for user choice
+          }),
+      };
+  });
 
-    const barData = {
-    labels: sortedLabels,
-    datasets: [{
-      label: 'Number of Votes',
-      data: sortedDataPoints,
-      backgroundColor: initialDistinctColors,
-      borderColor: initialDistinctColors.map((color, index) => {
-        return sortedLabels[index] === userChoice ? '#ffffff' : color; // white border for user choice
-      }),
-      borderWidth: sortedLabels.map(label => label === userChoice ? 3 : 1),
-    }]
+  const barData = {
+      labels: sortedLabels,
+      datasets: [{
+          label: 'Number of Votes',
+          data: sortedDataPoints,
+          backgroundColor: initialDistinctColors,
+          borderColor: initialDistinctColors.map((color, index) => labelStyles[sortedLabels[index]].borderColor),
+          borderWidth: sortedLabels.map(label => labelStyles[label].borderWidth),
+      }]
   };
 
   const pieData = {
-    labels: sortedLabels,
-    datasets: [{
-      label: 'Vote Percentage',
-      data: sortedDataPoints.map(vote => (vote / totalVotes * 100).toFixed(2)),
-      backgroundColor: initialDistinctColors,
-      borderColor: initialDistinctColors.map((color, index) => {
-        return sortedLabels[index] === userChoice ? '#ffffff' : color; // white border for user choice
-      }),
-      borderWidth: sortedLabels.map(label => label === userChoice ? 3 : 1),
-    }]
+      labels: sortedLabels,
+      datasets: [{
+          label: 'Vote Percentage',
+          data: sortedDataPoints.map(vote => (vote / totalVotes * 100).toFixed(2)),
+          backgroundColor: initialDistinctColors,
+          borderColor: initialDistinctColors.map((color, index) => labelStyles[sortedLabels[index]].borderColor),
+          borderWidth: sortedLabels.map(label => labelStyles[label].borderWidth),
+      }]
   };
 
-      const options = {
-        indexAxis: 'y',
-        scales: {
+  const options = {
+      indexAxis: 'y',
+      scales: {
           x: {
-            ticks: { stepSize: 1 },
-            scaleLabel: { display: true, labelString: 'Number of votes' }
+              ticks: { stepSize: 1 },
+              scaleLabel: { display: true, labelString: 'Number of votes' }
           }
-        },
-        plugins: {
-          legend: { position: 'right', onClick: () => {} },
+      },
+      plugins: {
+          legend: { position: 'right', onClick: () => { } },
           title: { display: true, text: 'Poll Results' }
-        }
-      };
+      }
+  };
 
-      const barChart = new Chart(document.getElementById('voteResultsChart'), { type: 'bar', data: barData, options: options });
-      const pieChart = new Chart(document.getElementById('voteResultsPieChart'), { type: 'pie', data: pieData, options: { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Vote Percentage' } } } });
+  const barChart = new Chart(document.getElementById('voteResultsChart'), { type: 'bar', data: barData, options: options });
+  const pieChart = new Chart(document.getElementById('voteResultsPieChart'), { type: 'pie', data: pieData, options: { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Vote Percentage' } } } });
 
-      function updateChartData(newData) {
-        let newTotalVotes = Object.values(newData).reduce((a, b) => a + b, 0);
-        let sortedLabels = Object.keys(newData).sort((a, b) => newData[b] - newData[a]);
-        let sortedDataPoints = sortedLabels.map(label => newData[label]);
-        const distinctColors = generateColorArray(sortedLabels);
+  function updateChartData(newData) {
+      let newTotalVotes = Object.values(newData).reduce((a, b) => a + b, 0);
+      let sortedLabels = Object.keys(newData).sort((a, b) => newData[b] - newData[a]);
+      let sortedDataPoints = sortedLabels.map(label => newData[label]);
+      const distinctColors = generateColorArray(sortedLabels);
 
-        barChart.data.labels = sortedLabels;
-        barChart.data.datasets.forEach((dataset) => {
+      // update label styles in the dictionary
+      sortedLabels.forEach(label => {
+          labelStyles[label] = {
+              borderWidth: label === userChoice ? 3 : 1,
+              borderColor: distinctColors.map((color, index) => {
+                  return sortedLabels[index] === userChoice ? '#ffffff' : color; // white border for user choice
+              }),
+          };
+      });
+
+      barChart.data.labels = sortedLabels;
+      barChart.data.datasets.forEach((dataset) => {
           dataset.data = sortedDataPoints;
           dataset.backgroundColor = distinctColors;
-          dataset.borderColor = distinctColors;
-        });
-        barChart.update();
+          dataset.borderColor = sortedLabels.map(label => labelStyles[label].borderColor);
+          dataset.borderWidth = sortedLabels.map(label => labelStyles[label].borderWidth);
+      });
+      barChart.update();
 
-        pieChart.data.labels = sortedLabels;
-        pieChart.data.datasets.forEach((dataset) => {
+      pieChart.data.labels = sortedLabels;
+      pieChart.data.datasets.forEach((dataset) => {
           dataset.data = sortedDataPoints.map(vote => (vote / newTotalVotes * 100).toFixed(2));
           dataset.backgroundColor = distinctColors;
-          dataset.borderColor = distinctColors;
-        });
-        pieChart.update();
-      }
+          dataset.borderColor = sortedLabels.map(label => labelStyles[label].borderColor);
+          dataset.borderWidth = sortedLabels.map(label => labelStyles[label].borderWidth);
+      });
+      pieChart.update();
+  }
 
-      function updateChartWithDemographics() {
-        const selectedDemographics = [];
-        document.querySelectorAll('#demographicFilters select').forEach((select) => {
-            if (select.value) {
-                const [category, value] = select.value.split(':');
-                selectedDemographics.push(select.value);
-                console.log(select.value);
-            }
-        });
+  function updateChartWithDemographics() {
+      const selectedDemographics = [];
+      document.querySelectorAll('#demographicFilters select').forEach((select) => {
+          if (select.value) {
+              const [category, value] = select.value.split(':');
+              selectedDemographics.push(select.value);
+              console.log(select.value);
+          }
+      });
 
-        const pollId = "{{ poll['unique_id'] }}";
-        fetch(`/get_filtered_votes?poll_id=${pollId}&demographics=${selectedDemographics.join(',')}`)
-            .then(response => response.json())
-            .then(data => {
-                updateChartData(data);
-            })
-            .catch(error => console.error('Error:', error));
-    }
+      const pollId = "{{ poll['unique_id'] }}";
+      fetch(`/get_filtered_votes?poll_id=${pollId}&demographics=${selectedDemographics.join(',')}`)
+          .then(response => response.json())
+          .then(data => {
+              updateChartData(data);
+          })
+          .catch(error => console.error('Error:', error));
+  }
 
-
-      // share button functionality
-      document.getElementById('shareButton').addEventListener('click', function() {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => {
-            alert('Poll URL copied to clipboard!');
-        }).catch(err => {
-            console.error('Error copying URL to clipboard:', err);
-        });
-    });
+  // share button functionality
+  document.getElementById('shareButton').addEventListener('click', function () {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+          alert('Poll URL copied to clipboard!');
+      }).catch(err => {
+          console.error('Error copying URL to clipboard:', err);
+      });
+  });
 </script>
 
 <!-- Display flash messages -->
