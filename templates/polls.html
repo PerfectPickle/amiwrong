@@ -1,16 +1,28 @@
-{% extends "layout.html" %} {% block title %} Login {% endblock %} {% block main
-%}
+{% extends "layout.html" %} {% block title %} My Polls {% endblock %} {% block
+main %}
 
-<h1>My Polls</h1>
-<div>
-  {% for poll in polls %}
-  <div>
-    <a href="/poll/{{ poll['unique_id'] }}">{{ poll["question"] }}</a>
+<div class="container">
+  <h1 class="mt-4">My Polls</h1>
+  <br />
+  <div class="row">
+    {% for poll in polls %}
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">
+            <a href="/poll/{{ poll['unique_id'] }}">{{ poll["question"] }}</a>
+          </h5>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
 
-<br />
-<button class="btn btn-primary small-btn">Make a poll</button>
+  <br />
+
+  <form action="/create" method="get">
+    <button type="submit" class="btn btn-primary small-btn">Make a poll</button>
+  </form>
+</div>
 
 {% endblock %}

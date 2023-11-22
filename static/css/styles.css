@@ -1,35 +1,48 @@
 #home-typed,
 .typed-cursor {
-	font-size: 40px;
+  font-size: 40px;
 }
 
 .btn {
-	font-size: 50px;
+  font-size: 50px;
 }
 
 .form-field,
 .form-btn {
-	font-size: 30px;
+  font-size: 30px;
 }
 
 #failure-msg:empty {
-	display: none;
+  display: none;
 }
 
-/* For the flash feedback messages */
+/* for the flash feedback messages */
 ul.flashes {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 ul.flashes li {
-	color: red;
+  color: red;
 }
 
-
 .small-btn {
-    width: 200px; 
-    height: 60px;
-    font-size: 28px; 
+  width: 200px;
+  height: 60px;
+  font-size: 28px;
+}
+
+.card {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.card-title a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.card-title a:hover {
+  color: #0056b3;
 }

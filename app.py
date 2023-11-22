@@ -129,6 +129,13 @@ def get_profile(user_id):
 
     try:
         profile = cursor.execute("SELECT * FROM profiles WHERE user_id=?;", (user_id,)).fetchone()
+        try:
+            age = int(profile.get("age"))
+            if age <= 0 or age > 120:
+                raise Exception("No valid age in profile")
+            profile["age"] = age
+        except:
+            profile["age"] = ""
     except:
         profile = False
     
@@ -561,7 +568,11 @@ def view_poll(unique_id):
             # check that preset demographic category and answer is valid
             match str(d).lower():
                 case "age":
-                    if int(demo_answers[d]) <= 0 or int(demo_answers[d]) >= 130:
+                    try:
+                        if int(demo_answers[d]) <= 0 or int(demo_answers[d]) >= 130:
+                            flash("Invalid age entered")
+                            return redirect(f'/poll/{unique_id}')
+                    except:
                         flash("Invalid age entered")
                         return redirect(f'/poll/{unique_id}')
                 case "country":
@@ -795,31 +806,25 @@ def profile():
         # Refresh page
         return redirect("/profile")
     else:
-        # Connect to the database
-        connection = sqlite3.connect("amiwrong.db")
-        # Use Row factory to fetch rows as dictionaries
-        connection.row_factory = sqlite3.Row
-        # Cursor with which to interact with database
-        cursor = connection.cursor()
+        profile = get_profile(session["user_id"])
 
-        # Execute a SELECT query to retrieve a row
-        cursor.execute("SELECT * FROM profiles WHERE user_id = ?", (session["user_id"],))
+        if profile:
+            age = profile['age']
+            country = profile['country']
+            gender = profile['gender']
+            sexuality = profile['sexuality']
+            politics = profile['politics']
+            language = profile['language']
 
-        # Fetch the row as dict
-        row = cursor.fetchone()
-
-        if row:
-            age = row['age']
-            country = row['country']
-            gender = row['gender']
-            sexuality = row['sexuality']
-            politics = row['politics']
-            language = row['language']
-
-        # Close the cursor and connection
-        cursor.close()
-        connection.close()
         return render_template("profile.html", age=age, country=country, countries=countries, gender=gender, gender_options=gender_options, sexuality=sexuality, sexualities=sexualities, politics=politics, politics_options=politics_options, language=language, languages=languages)
+
+@app.route("/privacy_policy")
+def privacy_policy():
+    return render_template("privacy_policy.html")
+
+@app.route("/terms")
+def terms_of_service():
+    return render_template("terms.html")
 
 
 @app.errorhandler(404)
