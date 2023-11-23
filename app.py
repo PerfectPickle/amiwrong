@@ -423,6 +423,9 @@ def register():
         cursor.close()
         connection.close()
 
+        # log user in
+        session["user_id"] = user_id
+
         return redirect("/")
     else:
         return render_template("register.html")
